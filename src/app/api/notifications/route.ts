@@ -1,0 +1,53 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import connectDB from '@/lib/mongodb';
+import Notification from '@/lib/models/Notification';
+
+export async function GET(req: NextRequest) {
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user) {
+            return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+        }
+
+        await connectDB();
+
+        // Get last 10 notifications for the freelancer
+        const notifications = await Notification.find({
+            freelancerId: (session.user as any).id,
+        })
+            .sort({ createdAt: -1 })
+            .limit(10)
+            .populate('projectId', 'title');
+
+        return NextResponse.json(notifications);
+    } catch (error) {
+        console.error('Error fetching notifications:', error);
+        return NextResponse.json({ message: 'Server error' }, { status: 500 });
+    }
+}
+
+export async function PATCH(req: NextRequest) {
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user) {
+            return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+        }
+
+        const body = await req.json();
+        await connectDB();
+
+        if (body.readAll) {
+            await Notification.updateMany(
+                { freelancerId: (session.user as any).id, read: false },
+                { $set: { read: true } }
+            );
+        }
+
+        return NextResponse.json({ message: 'Notifications updated' });
+    } catch (error) {
+        console.error('Error updating notifications:', error);
+        return NextResponse.json({ message: 'Server error' }, { status: 500 });
+    }
+}
