@@ -443,7 +443,7 @@ export default function Home() {
                     <Star key={i} size={13} fill="#f59e0b" style={{ color: '#f59e0b' }}/>
                   ))}
                 </div>
-                <p className="text-sm leading-relaxed mb-5" style={{ color: '#4a5068' }}>"{t.text}"</p>
+                <p className="text-sm leading-relaxed mb-5" style={{ color: '#4a5068' }}>&ldquo;{t.text}&rdquo;</p>
                 <div className="flex items-center gap-3">
                   <div className="h-9 w-9 rounded-full flex items-center justify-center text-white text-xs font-black"
                     style={{ background: 'linear-gradient(135deg,#7c3aed,#a855f7)' }}>

@@ -56,6 +56,7 @@ export function ApprovalForm({ projectId, isOpen, onClose, onSuccess }: Approval
         if (isOpen) {
             fetchFiles();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, projectId]);
 
     const fetchFiles = async () => {
@@ -84,7 +85,7 @@ export function ApprovalForm({ projectId, isOpen, onClose, onSuccess }: Approval
             reset();
             onSuccess();
             onClose();
-        } catch (error) {
+        } catch {
             toast.error('Error sending approval request');
         }
     };

@@ -130,7 +130,7 @@ export function NotificationBell() {
               </div>
               <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>All quiet here</p>
               <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
-                You'll be notified when clients take action.
+                You&apos;ll be notified when clients take action.
               </p>
             </div>
           ) : (

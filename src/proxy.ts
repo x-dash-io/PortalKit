@@ -33,7 +33,7 @@ const uploadLimit = redis ? new Ratelimit({
     prefix: "ratelimit:upload",
 }) : null;
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
     // Get IP from headers for Vercel/proxies
