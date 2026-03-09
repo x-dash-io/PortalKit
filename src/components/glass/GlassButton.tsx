@@ -6,54 +6,44 @@ import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 
 interface GlassButtonProps extends HTMLMotionProps<'button'> {
-    variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
-    size?: 'sm' | 'md' | 'lg' | 'icon';
-    loading?: boolean;
-    icon?: React.ReactNode;
-    children?: React.ReactNode;
+  variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
+  size?: 'sm' | 'md' | 'lg' | 'icon';
+  loading?: boolean;
+  icon?: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 export const GlassButton = ({
-    children,
-    className,
-    variant = 'primary',
-    size = 'md',
-    loading = false,
-    icon,
-    ...props
+  children, className, variant = 'primary', size = 'md', loading = false, icon, ...props
 }: GlassButtonProps) => {
-    const variants: Record<string, string> = {
-        primary: 'bg-[var(--accent)] text-white shadow-[var(--glow)] hover:opacity-90',
-        secondary: 'border border-[var(--border-subtle)] bg-[var(--surface)] text-[var(--text-primary)] shadow-[var(--shadow-soft)] hover:bg-[var(--muted)]',
-        ghost: 'bg-transparent text-[var(--text-secondary)] hover:bg-[var(--accent-light)] hover:text-[var(--accent)]',
-        danger: 'bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500 hover:text-white',
-    };
+  const variantStyles: Record<string, React.CSSProperties> = {
+    primary:   { background: 'var(--accent-gradient)', color: 'var(--primary-foreground)', boxShadow: 'var(--glow-sm)' },
+    secondary: { background: 'var(--surface)',         color: 'var(--text-primary)',         border: '1.5px solid var(--border-medium)', boxShadow: 'var(--shadow-soft)' },
+    ghost:     { background: 'transparent',            color: 'var(--text-secondary)' },
+    danger:    { background: 'var(--destructive-bg)',  color: 'var(--destructive)',           border: '1.5px solid var(--destructive-bg)' },
+  };
 
-    const sizes = {
-        sm: 'px-4 py-2 text-xs rounded-xl h-9',
-        md: 'px-6 py-3 text-sm rounded-2xl h-11 font-bold',
-        lg: 'px-8 py-4 text-base rounded-2xl h-14 font-black tracking-tight',
-        icon: 'p-2 rounded-xl h-10 w-10 flex items-center justify-center',
-    };
+  const sizes = {
+    sm:   'px-4 py-2 text-xs rounded-xl h-9',
+    md:   'px-5 py-2.5 text-sm rounded-xl h-10 font-semibold',
+    lg:   'px-7 py-3 text-sm rounded-xl h-11 font-bold',
+    icon: 'p-2 rounded-xl h-9 w-9 flex items-center justify-center',
+  };
 
-    return (
-        <motion.button
-            whileTap={{ scale: 0.96 }}
-            whileHover={{ scale: 1.02 }}
-            className={cn(
-                'inline-flex items-center justify-center transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none',
-                variants[variant],
-                sizes[size],
-                className
-            )}
-            {...props}
-        >
-            {loading ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : icon ? (
-                <span className="mr-2 flex items-center justify-center">{icon}</span>
-            ) : null}
-            {children}
-        </motion.button>
-    );
+  return (
+    <motion.button
+      whileTap={{ scale: 0.97 }}
+      whileHover={{ opacity: 0.9 }}
+      className={cn(
+        'inline-flex items-center justify-center gap-2 transition-all duration-150 disabled:opacity-50 disabled:pointer-events-none',
+        sizes[size],
+        className
+      )}
+      style={variantStyles[variant]}
+      {...props}
+    >
+      {loading ? <Loader2 size={14} className="spin-slow" /> : icon ? <span className="flex items-center">{icon}</span> : null}
+      {children}
+    </motion.button>
+  );
 };

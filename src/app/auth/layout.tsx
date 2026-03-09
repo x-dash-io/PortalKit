@@ -2,39 +2,46 @@ import Link from 'next/link';
 import { FolderKanban, ShieldCheck, ReceiptText, Zap } from 'lucide-react';
 
 const highlights = [
-  { title: 'Project control', description: 'Run milestones, approvals, files, and billing from one operating layer.', icon: FolderKanban },
-  { title: 'Client-safe delivery', description: 'Share only the portal surfaces your client needs to see.', icon: ShieldCheck },
-  { title: 'Finance visibility', description: 'Track invoice send, view, and paid states without leaving the project.', icon: ReceiptText },
+  { title: 'Project control',       description: 'Run milestones, approvals, files, and billing from one operating layer.', icon: FolderKanban },
+  { title: 'Client-safe delivery',  description: 'Share only the portal surfaces your client needs to see.',                icon: ShieldCheck  },
+  { title: 'Finance visibility',    description: 'Track invoice send, view, and paid states without leaving the project.',  icon: ReceiptText  },
 ];
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen" style={{ background: 'var(--canvas)' }}>
-      {/* Ambient */}
+      {/* Background */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden>
         <div
           className="absolute -top-48 left-1/3 h-[500px] w-[500px] rounded-full"
-          style={{ background: 'radial-gradient(circle, var(--accent) 0%, transparent 70%)', filter: 'blur(100px)', opacity: 0.14 }}
+          style={{ background: 'radial-gradient(circle, var(--accent) 0%, transparent 70%)', filter: 'blur(100px)', opacity: 0.12 }}
         />
         <div
           className="absolute bottom-0 right-0 h-80 w-80 rounded-full"
-          style={{ background: 'radial-gradient(circle, var(--accent-3) 0%, transparent 70%)', filter: 'blur(80px)', opacity: 0.08 }}
+          style={{ background: 'radial-gradient(circle, var(--accent-3) 0%, transparent 70%)', filter: 'blur(80px)', opacity: 0.07 }}
         />
-        {/* Grid */}
-        <svg className="absolute inset-0 w-full h-full opacity-40" xmlns="http://www.w3.org/2000/svg">
+        <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <pattern id="auth-grid" width="52" height="52" patternUnits="userSpaceOnUse">
-              <path d="M 52 0 L 0 0 0 52" fill="none" stroke="rgba(124,58,237,0.06)" strokeWidth="1"/>
+            <pattern id="auth-grid" width="56" height="56" patternUnits="userSpaceOnUse">
+              <path d="M 56 0 L 0 0 0 56" fill="none" stroke="rgba(124,58,237,0.05)" strokeWidth="1"/>
             </pattern>
+            <radialGradient id="auth-fade" cx="50%" cy="60%" r="55%">
+              <stop offset="0%" stopColor="white" stopOpacity="0"/>
+              <stop offset="100%" stopColor="white" stopOpacity="0.8"/>
+            </radialGradient>
+            <mask id="auth-mask">
+              <rect width="100%" height="100%" fill="white"/>
+              <rect width="100%" height="100%" fill="url(#auth-fade)"/>
+            </mask>
           </defs>
-          <rect width="100%" height="100%" fill="url(#auth-grid)"/>
+          <rect width="100%" height="100%" fill="url(#auth-grid)" mask="url(#auth-mask)"/>
         </svg>
       </div>
 
       <div className="relative mx-auto grid min-h-screen max-w-6xl lg:grid-cols-[1fr_460px]">
-        {/* ── Left hero panel ── */}
+        {/* Left hero panel */}
         <section className="hidden lg:flex flex-col justify-between px-10 py-12">
-          <Link href="/" className="flex items-center gap-2.5">
+          <Link href="/" className="flex items-center gap-2.5 w-fit">
             <span
               className="flex h-9 w-9 items-center justify-center rounded-xl text-white"
               style={{ background: 'var(--accent-gradient)', boxShadow: 'var(--glow-sm)' }}
@@ -70,18 +77,14 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
                 >
                   <item.icon size={16} />
                 </div>
-                <h2 className="text-xs font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
-                  {item.title}
-                </h2>
-                <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-                  {item.description}
-                </p>
+                <h2 className="text-xs font-bold mb-1" style={{ color: 'var(--text-primary)' }}>{item.title}</h2>
+                <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{item.description}</p>
               </div>
             ))}
           </div>
         </section>
 
-        {/* ── Right form panel ── */}
+        {/* Right form panel */}
         <section
           className="flex items-center justify-center px-6 py-10 lg:px-8 lg:border-l"
           style={{ borderColor: 'var(--border-subtle)' }}
