@@ -13,11 +13,22 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { CommandPalette } from '@/components/dashboard/CommandPalette';
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { sidebarOpen } = useUIStore();
+
+  // Set CSS var for sidebar-aware padding (Tailwind can't handle dynamic arbitrary values)
+  useEffect(() => {
+    const update = () => {
+      const w = window.innerWidth >= 768 ? (sidebarOpen ? '240px' : '64px') : '0px';
+      document.documentElement.style.setProperty('--sidebar-width', w);
+    };
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, [sidebarOpen]);
   const { data: session } = useSession();
   const pathname = usePathname();
   const router = useRouter();
@@ -53,7 +64,11 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       <GlassNav />
 
       <div
-        className={`min-h-screen pb-24 md:pb-0 transition-[padding-left] duration-[260ms] ease-[cubic-bezier(0.4,0,0.2,1)] md:${sidebarOpen ? 'pl-[240px]' : 'pl-[64px]'}`}
+        className="min-h-screen pb-24 md:pb-0"
+        style={{
+          paddingLeft: `var(--sidebar-width, 0px)`,
+          transition: 'padding-left 260ms cubic-bezier(0.4,0,0.2,1)',
+        }}
       >
         {/* ── Top header ── */}
         <header

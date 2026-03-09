@@ -254,7 +254,15 @@ const testimonials = [
 /* ─── Page ─── */
 export default function Home() {
   return (
-    <main style={{ minHeight: '100vh', background: 'var(--canvas)', overflow: 'hidden' }}>
+    <main
+      data-theme="landing"
+      style={{
+        minHeight: '100vh',
+        background: '#0d0a1a',
+        overflow: 'hidden',
+        colorScheme: 'dark',
+      }}
+    >
       <style>{`
         @keyframes porb { 0%,100% { transform:scale(1) translate(0,0); opacity:.7; } 50% { transform:scale(1.15) translate(10px,-20px); opacity:1; } }
         @keyframes float-up { from { opacity:0; transform:translateY(28px); } to { opacity:1; transform:translateY(0); } }
@@ -266,14 +274,14 @@ export default function Home() {
         .anim-p      { animation: float-up   0.7s cubic-bezier(.16,1,.3,1) both 0.4s; }
         .anim-cta    { animation: float-up   0.7s cubic-bezier(.16,1,.3,1) both 0.55s; }
         .anim-prev   { animation: preview-in 1s   cubic-bezier(.16,1,.3,1) both 0.7s; perspective:1200px; }
-        .gradient-text {
-          background: linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #e879f9 100%);
+        .lp-gradient-text {
+          background: linear-gradient(135deg, #a78bfa 0%, #c084fc 50%, #e879f9 100%);
           background-size: 200% auto;
           -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
           animation: shimmer 3s linear infinite;
         }
-        .card-hover { transition: transform 0.2s ease, box-shadow 0.2s ease; }
-        .card-hover:hover { transform: translateY(-3px); box-shadow: 0 8px 32px rgba(124,58,237,0.14); }
+        .lp-card-hover { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .lp-card-hover:hover { transform: translateY(-3px); box-shadow: 0 8px 32px rgba(124,58,237,0.22); }
       `}</style>
 
       <GridBackground />
@@ -282,25 +290,25 @@ export default function Home() {
       <div className="relative z-10 mx-auto max-w-7xl px-6 py-8">
         {/* Nav */}
         <header className="flex items-center justify-between rounded-2xl px-5 py-3.5"
-          style={{ background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(124,58,237,0.12)', backdropFilter: 'blur(20px)', boxShadow: '0 1px 3px rgba(13,10,26,0.04), 0 6px 20px rgba(13,10,26,0.06)' }}>
+          style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(20px)', boxShadow: '0 1px 3px rgba(0,0,0,0.3)' }}>
           <div className="flex items-center gap-2.5">
             <span className="flex h-9 w-9 items-center justify-center rounded-xl text-white"
-              style={{ background: 'linear-gradient(135deg,#7c3aed,#a855f7)', boxShadow: '0 0 16px rgba(124,58,237,0.35)' }}>
+              style={{ background: 'linear-gradient(135deg,#7c3aed,#a855f7)', boxShadow: '0 0 16px rgba(124,58,237,0.5)' }}>
               <Zap size={17} strokeWidth={2.5}/>
             </span>
-            <span className="text-sm font-black" style={{ color: '#0d0a1a' }}>PortalKit</span>
+            <span className="text-sm font-black" style={{ color: '#f1f5f9' }}>PortalKit</span>
           </div>
           <nav className="hidden md:flex items-center gap-6">
             {['Features', 'Pricing', 'Docs'].map(item => (
-              <a key={item} href="#" className="text-xs font-semibold" style={{ color: '#4a5068' }}>{item}</a>
+              <a key={item} href="#" className="text-xs font-semibold" style={{ color: '#94a3b8' }}>{item}</a>
             ))}
           </nav>
           <div className="flex items-center gap-2">
-            <Button asChild variant="ghost" size="sm" className="text-xs font-semibold" style={{ color: '#4a5068' }}>
+            <Button asChild variant="ghost" size="sm" className="text-xs font-semibold" style={{ color: '#94a3b8' }}>
               <Link href="/auth/login">Sign in</Link>
             </Button>
             <Button asChild size="sm" className="rounded-xl text-xs font-bold"
-              style={{ background: 'linear-gradient(135deg,#7c3aed,#a855f7)', color: 'white', boxShadow: '0 0 16px rgba(124,58,237,0.3)' }}>
+              style={{ background: 'linear-gradient(135deg,#7c3aed,#a855f7)', color: 'white', boxShadow: '0 0 16px rgba(124,58,237,0.4)' }}>
               <Link href="/auth/signup">Get started free <ArrowRight size={13}/></Link>
             </Button>
           </div>
@@ -309,32 +317,32 @@ export default function Home() {
         {/* Hero */}
         <section className="mt-20 text-center">
           <div className="anim-badge inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-widest mb-8"
-            style={{ background: 'rgba(124,58,237,0.08)', color: '#7c3aed', border: '1px solid rgba(124,58,237,0.2)' }}>
+            style={{ background: 'rgba(124,58,237,0.15)', color: '#a78bfa', border: '1px solid rgba(167,139,250,0.3)' }}>
             <Sparkles size={11}/>
             The client portal for serious freelancers
             <Sparkles size={11}/>
           </div>
 
           <h1 className="anim-h1 mx-auto max-w-5xl text-5xl font-black leading-[1.04] tracking-tight md:text-6xl lg:text-7xl"
-            style={{ color: '#0d0a1a' }}>
+            style={{ color: '#f1f5f9' }}>
             Stop juggling tools.{' '}
             <br className="hidden md:block"/>
             Start{' '}
-            <span className="gradient-text">running your business.</span>
+            <span className="lp-gradient-text">running your business.</span>
           </h1>
 
-          <p className="anim-p mx-auto mt-6 max-w-2xl text-lg leading-relaxed" style={{ color: '#4a5068' }}>
+          <p className="anim-p mx-auto mt-6 max-w-2xl text-lg leading-relaxed" style={{ color: '#94a3b8' }}>
             PortalKit gives freelancers and studios one secure, beautiful place to run projects,
             deliver files, collect approvals, and send invoices — all under your brand.
           </p>
 
           <div className="anim-cta mt-10 flex flex-wrap items-center justify-center gap-3">
             <Button asChild size="lg" className="rounded-xl px-8 font-bold text-sm"
-              style={{ background: 'linear-gradient(135deg,#7c3aed,#a855f7)', color: 'white', boxShadow: '0 0 30px rgba(124,58,237,0.35)', height: 48 }}>
+              style={{ background: 'linear-gradient(135deg,#7c3aed,#a855f7)', color: 'white', boxShadow: '0 0 30px rgba(124,58,237,0.45)', height: 48 }}>
               <Link href="/auth/signup">Create your workspace <ArrowRight size={16}/></Link>
             </Button>
             <Button asChild size="lg" variant="outline" className="rounded-xl px-8 font-semibold text-sm"
-              style={{ borderColor: 'rgba(124,58,237,0.25)', color: '#4a5068', height: 48, background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)' }}>
+              style={{ borderColor: 'rgba(255,255,255,0.15)', color: '#e2e8f0', height: 48, background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(8px)' }}>
               <Link href="/dashboard">View live demo</Link>
             </Button>
           </div>
@@ -346,8 +354,8 @@ export default function Home() {
               { icon: Star, label: '5-star rated by freelancers' },
               { icon: Users, label: '2,400+ studios trust PortalKit' },
             ].map(({ icon: Icon, label }) => (
-              <div key={label} className="flex items-center gap-1.5 text-xs font-medium" style={{ color: '#8b90a8' }}>
-                <Icon size={13} style={{ color: '#7c3aed' }}/>{label}
+              <div key={label} className="flex items-center gap-1.5 text-xs font-medium" style={{ color: '#64748b' }}>
+                <Icon size={13} style={{ color: '#a78bfa' }}/>{label}
               </div>
             ))}
           </div>
@@ -368,10 +376,10 @@ export default function Home() {
             { value: '18,000+', label: 'Files delivered' },
             { value: '98%', label: 'Client satisfaction' },
           ].map(({ value, label }) => (
-            <div key={label} className="text-center rounded-2xl p-5 card-hover"
-              style={{ background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(124,58,237,0.1)', backdropFilter: 'blur(8px)' }}>
-              <p className="text-2xl font-black gradient-text">{value}</p>
-              <p className="text-xs font-medium mt-1" style={{ color: '#8b90a8' }}>{label}</p>
+            <div key={label} className="text-center rounded-2xl p-5 lp-card-hover"
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(8px)' }}>
+              <p className="text-2xl font-black lp-gradient-text">{value}</p>
+              <p className="text-xs font-medium mt-1" style={{ color: '#64748b' }}>{label}</p>
             </div>
           ))}
         </section>
@@ -379,22 +387,22 @@ export default function Home() {
         {/* Features */}
         <section className="mt-24">
           <div className="text-center mb-12">
-            <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: '#7c3aed' }}>Everything included</p>
-            <h2 className="text-3xl font-black md:text-4xl" style={{ color: '#0d0a1a' }}>One platform, complete workflow</h2>
-            <p className="mt-3 text-base max-w-xl mx-auto" style={{ color: '#4a5068' }}>
+            <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: '#a78bfa' }}>Everything included</p>
+            <h2 className="text-3xl font-black md:text-4xl" style={{ color: '#f1f5f9' }}>One platform, complete workflow</h2>
+            <p className="mt-3 text-base max-w-xl mx-auto" style={{ color: '#94a3b8' }}>
               Built specifically for the client-facing workflow freelancers actually run, not a generic project manager with a portal bolted on.
             </p>
           </div>
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {pillars.map((pillar) => (
-              <div key={pillar.title} className="rounded-2xl p-6 card-hover"
-                style={{ background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(124,58,237,0.1)', backdropFilter: 'blur(8px)' }}>
+              <div key={pillar.title} className="rounded-2xl p-6 lp-card-hover"
+                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(8px)' }}>
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl mb-4"
-                  style={{ background: 'rgba(124,58,237,0.08)', color: '#7c3aed' }}>
+                  style={{ background: 'rgba(124,58,237,0.15)', color: '#a78bfa' }}>
                   <pillar.icon size={21}/>
                 </div>
-                <h3 className="text-base font-black mb-2" style={{ color: '#0d0a1a' }}>{pillar.title}</h3>
-                <p className="text-sm leading-relaxed" style={{ color: '#4a5068' }}>{pillar.description}</p>
+                <h3 className="text-base font-black mb-2" style={{ color: '#f1f5f9' }}>{pillar.title}</h3>
+                <p className="text-sm leading-relaxed" style={{ color: '#94a3b8' }}>{pillar.description}</p>
               </div>
             ))}
           </div>
@@ -403,8 +411,8 @@ export default function Home() {
         {/* How it works */}
         <section className="mt-24">
           <div className="text-center mb-12">
-            <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: '#7c3aed' }}>Simple to start</p>
-            <h2 className="text-3xl font-black md:text-4xl" style={{ color: '#0d0a1a' }}>Up and running in minutes</h2>
+            <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: '#a78bfa' }}>Simple to start</p>
+            <h2 className="text-3xl font-black md:text-4xl" style={{ color: '#f1f5f9' }}>Up and running in minutes</h2>
           </div>
           <div className="max-w-2xl mx-auto space-y-3">
             {[
@@ -413,15 +421,15 @@ export default function Home() {
               { step: '03', title: 'Invoice and get paid', desc: 'Issue invoices directly from the project, track when they\'re viewed, and follow up on overdue balances.' },
               { step: '04', title: 'Stay organized at scale', desc: 'Use the dashboard to monitor all projects, notifications, and storage across your entire business.' },
             ].map(({ step, title, desc }) => (
-              <div key={step} className="flex gap-4 items-start rounded-2xl p-4 card-hover"
-                style={{ background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(124,58,237,0.1)', backdropFilter: 'blur(8px)' }}>
+              <div key={step} className="flex gap-4 items-start rounded-2xl p-4 lp-card-hover"
+                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(8px)' }}>
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl font-mono text-xs font-black text-white"
-                  style={{ background: 'linear-gradient(135deg,#7c3aed,#a855f7)', boxShadow: '0 0 12px rgba(124,58,237,0.25)' }}>
+                  style={{ background: 'linear-gradient(135deg,#7c3aed,#a855f7)', boxShadow: '0 0 12px rgba(124,58,237,0.35)' }}>
                   {step}
                 </span>
                 <div>
-                  <p className="text-sm font-black mb-1" style={{ color: '#0d0a1a' }}>{title}</p>
-                  <p className="text-sm leading-relaxed" style={{ color: '#4a5068' }}>{desc}</p>
+                  <p className="text-sm font-black mb-1" style={{ color: '#f1f5f9' }}>{title}</p>
+                  <p className="text-sm leading-relaxed" style={{ color: '#94a3b8' }}>{desc}</p>
                 </div>
               </div>
             ))}
@@ -431,27 +439,27 @@ export default function Home() {
         {/* Testimonials */}
         <section className="mt-24">
           <div className="text-center mb-12">
-            <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: '#7c3aed' }}>What they say</p>
-            <h2 className="text-3xl font-black md:text-4xl" style={{ color: '#0d0a1a' }}>Freelancers love PortalKit</h2>
+            <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: '#a78bfa' }}>What they say</p>
+            <h2 className="text-3xl font-black md:text-4xl" style={{ color: '#f1f5f9' }}>Freelancers love PortalKit</h2>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
             {testimonials.map((t) => (
-              <div key={t.name} className="rounded-2xl p-6 card-hover"
-                style={{ background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(124,58,237,0.1)', backdropFilter: 'blur(8px)' }}>
+              <div key={t.name} className="rounded-2xl p-6 lp-card-hover"
+                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(8px)' }}>
                 <div className="flex gap-0.5 mb-4">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star key={i} size={13} fill="#f59e0b" style={{ color: '#f59e0b' }}/>
                   ))}
                 </div>
-                <p className="text-sm leading-relaxed mb-5" style={{ color: '#4a5068' }}>&ldquo;{t.text}&rdquo;</p>
+                <p className="text-sm leading-relaxed mb-5" style={{ color: '#94a3b8' }}>&ldquo;{t.text}&rdquo;</p>
                 <div className="flex items-center gap-3">
                   <div className="h-9 w-9 rounded-full flex items-center justify-center text-white text-xs font-black"
                     style={{ background: 'linear-gradient(135deg,#7c3aed,#a855f7)' }}>
                     {t.avatar}
                   </div>
                   <div>
-                    <p className="text-xs font-black" style={{ color: '#0d0a1a' }}>{t.name}</p>
-                    <p className="text-xs" style={{ color: '#8b90a8' }}>{t.role}</p>
+                    <p className="text-xs font-black" style={{ color: '#f1f5f9' }}>{t.name}</p>
+                    <p className="text-xs" style={{ color: '#64748b' }}>{t.role}</p>
                   </div>
                 </div>
               </div>
@@ -462,7 +470,7 @@ export default function Home() {
         {/* CTA */}
         <section className="mt-24 mb-12">
           <div className="rounded-3xl p-12 text-center relative overflow-hidden"
-            style={{ background: 'linear-gradient(135deg,#7c3aed 0%,#a855f7 50%,#e879f9 100%)', boxShadow: '0 0 60px rgba(124,58,237,0.35)' }}>
+            style={{ background: 'linear-gradient(135deg,#7c3aed 0%,#a855f7 50%,#e879f9 100%)', boxShadow: '0 0 60px rgba(124,58,237,0.45)' }}>
             <div className="absolute inset-0 opacity-20"
               style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.3) 1px, transparent 0)', backgroundSize: '24px 24px' }}/>
             <div className="relative z-10">
@@ -491,12 +499,12 @@ export default function Home() {
             <span className="flex h-7 w-7 items-center justify-center rounded-lg text-white" style={{ background: 'linear-gradient(135deg,#7c3aed,#a855f7)' }}>
               <Zap size={13} strokeWidth={2.5}/>
             </span>
-            <span className="text-sm font-black" style={{ color: '#0d0a1a' }}>PortalKit</span>
+            <span className="text-sm font-black" style={{ color: '#f1f5f9' }}>PortalKit</span>
           </div>
-          <p className="text-xs" style={{ color: '#8b90a8' }}>&copy; {new Date().getFullYear()} PortalKit. Built for serious client operations.</p>
+          <p className="text-xs" style={{ color: '#475569' }}>&copy; {new Date().getFullYear()} PortalKit. Built for serious client operations.</p>
           <div className="flex gap-4">
             {['Privacy', 'Terms', 'Contact'].map(l => (
-              <a key={l} href="#" className="text-xs" style={{ color: '#8b90a8' }}>{l}</a>
+              <a key={l} href="#" className="text-xs" style={{ color: '#475569' }}>{l}</a>
             ))}
           </div>
         </footer>

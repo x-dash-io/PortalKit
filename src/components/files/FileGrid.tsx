@@ -19,6 +19,7 @@ import { GlassCard } from '@/components/glass/GlassCard';
 import { GlassBadge } from '@/components/glass/GlassBadge';
 import { GlassButton } from '@/components/glass/GlassButton';
 import { GlassInput } from '@/components/glass/GlassInput';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 interface FileGridProps {
     projectId: string;
@@ -46,6 +47,7 @@ export function FileGrid({ projectId, refreshTrigger, onPreview }: FileGridProps
     const [moving, setMoving] = useState<InlineEdit | null>(null);
     const [versionFile, setVersionFile] = useState<FileRecord | null>(null);
     const [uploadingVersion, setUploadingVersion] = useState(false);
+    const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string; name: string }>({ open: false, id: '', name: '' });
     const versionInputRef = useRef<HTMLInputElement>(null);
     const renameRef = useRef<HTMLInputElement>(null);
     const moveRef = useRef<HTMLInputElement>(null);
@@ -69,8 +71,11 @@ export function FileGrid({ projectId, refreshTrigger, onPreview }: FileGridProps
     useEffect(() => { if (renaming) setTimeout(() => renameRef.current?.select(), 50); }, [renaming]);
     useEffect(() => { if (moving) setTimeout(() => moveRef.current?.select(), 50); }, [moving]);
 
-    const handleDelete = async (fileId: string, name: string) => {
-        if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
+    const handleDelete = (fileId: string, name: string) => {
+        setDeleteConfirm({ open: true, id: fileId, name });
+    };
+
+    const executeDelete = async (fileId: string) => {
         try {
             const res = await fetch(`/api/projects/${projectId}/files/${fileId}`, { method: 'DELETE' });
             if (!res.ok) throw new Error();
@@ -176,6 +181,15 @@ export function FileGrid({ projectId, refreshTrigger, onPreview }: FileGridProps
 
     return (
         <div className="space-y-6">
+            <ConfirmDialog
+                open={deleteConfirm.open}
+                onOpenChange={(open) => setDeleteConfirm(s => ({ ...s, open }))}
+                title="Delete File"
+                description={`"${deleteConfirm.name}" will be permanently deleted. This cannot be undone.`}
+                confirmLabel="Delete"
+                variant="destructive"
+                onConfirm={() => executeDelete(deleteConfirm.id)}
+            />
             {/* Search + folder filter */}
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                 <div className="flex-1 max-w-xs">

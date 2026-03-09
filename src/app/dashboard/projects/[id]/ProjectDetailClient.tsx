@@ -26,6 +26,7 @@ import { ApprovalCard } from '@/components/approvals/ApprovalCard';
 import { GlassCard } from '@/components/glass/GlassCard';
 import { GlassBadge } from '@/components/glass/GlassBadge';
 import { GlassButton } from '@/components/glass/GlassButton';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 interface ProjectDetailClientProps {
     project: ProjectDetail;
@@ -60,6 +61,7 @@ export function ProjectDetailClient({ project: initialProject }: ProjectDetailCl
     const [isProjectEditorOpen, setIsProjectEditorOpen] = useState(false);
     const [isSavingProject, setIsSavingProject] = useState(false);
     const [isArchiving, setIsArchiving] = useState(false);
+    const [archiveConfirmOpen, setArchiveConfirmOpen] = useState(false);
     const [editState, setEditState] = useState<ProjectEditState>(initialEditState(initialProject));
     const [invoiceEditorOpen, setInvoiceEditorOpen] = useState(false);
     const [editingInvoice, setEditingInvoice] = useState<InvoiceRecord | null>(null);
@@ -126,7 +128,6 @@ export function ProjectDetailClient({ project: initialProject }: ProjectDetailCl
     };
 
     const handleArchive = async () => {
-        if (!confirm('Archive this project? It will be hidden from the main dashboard.')) return;
         setIsArchiving(true);
         try {
             const res = await fetch(`/api/projects/${project._id}`, { method: 'DELETE' });
@@ -151,6 +152,15 @@ export function ProjectDetailClient({ project: initialProject }: ProjectDetailCl
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <ConfirmDialog
+                open={archiveConfirmOpen}
+                onOpenChange={setArchiveConfirmOpen}
+                title="Archive Project"
+                description="This project will be hidden from your main dashboard. You can find archived projects in Settings."
+                confirmLabel="Archive"
+                variant="destructive"
+                onConfirm={() => void handleArchive()}
+            />
             {/* Header */}
             <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
                 <div className="space-y-4 flex-1">
@@ -196,7 +206,7 @@ export function ProjectDetailClient({ project: initialProject }: ProjectDetailCl
                     <GlassButton variant="secondary" onClick={() => setIsProjectEditorOpen(true)} className="gap-2 text-sm">
                         <Edit3 size={14} /> Edit
                     </GlassButton>
-                    <GlassButton variant="secondary" onClick={() => void handleArchive()} disabled={isArchiving} className="gap-2 text-sm" style={{ color: 'var(--warning)' }}>
+                    <GlassButton variant="secondary" onClick={() => setArchiveConfirmOpen(true)} disabled={isArchiving} className="gap-2 text-sm" style={{ color: 'var(--warning)' }}>
                         <Archive size={14} /> {isArchiving ? 'Archiving…' : 'Archive'}
                     </GlassButton>
                     <GlassButton onClick={() => window.open(`/portal/${project.portalTokenPrefix}`, '_blank')} className="gap-2 text-sm">
@@ -468,25 +478,25 @@ export function ProjectDetailClient({ project: initialProject }: ProjectDetailCl
             {/* Invoice editor dialog */}
             <Dialog open={invoiceEditorOpen} onOpenChange={setInvoiceEditorOpen}>
                 <DialogContent
-                    className="max-w-5xl rounded-2xl border-0 p-0 overflow-hidden"
+                    className="max-w-5xl w-[95vw] rounded-2xl border-0 p-0 overflow-hidden max-h-[92vh] flex flex-col"
                     style={{ background: 'var(--surface)', border: '1px solid var(--border-medium)', boxShadow: 'var(--shadow-modal)' }}
                 >
-                    <div className="h-1" style={{ background: 'var(--accent-gradient)' }} />
-                    <div className="p-6">
+                    <div className="h-1 shrink-0" style={{ background: 'var(--accent-gradient)' }} />
+                    <div className="px-6 pt-5 pb-2 shrink-0">
                         <DialogHeader>
                             <DialogTitle style={{ color: 'var(--text-primary)' }}>
                                 {editingInvoice ? 'Edit Invoice' : 'Create Invoice'}
                             </DialogTitle>
                         </DialogHeader>
-                        <div className="mt-5">
-                            <InvoiceEditor
-                                projectId={project._id}
-                                project={project}
-                                initialData={editingInvoice ?? undefined}
-                                onSuccess={handleInvoiceSaved}
-                                onCancel={() => { setInvoiceEditorOpen(false); setEditingInvoice(null); }}
-                            />
-                        </div>
+                    </div>
+                    <div className="flex-1 overflow-y-auto px-6 pb-6">
+                        <InvoiceEditor
+                            projectId={project._id}
+                            project={project}
+                            initialData={editingInvoice ?? undefined}
+                            onSuccess={handleInvoiceSaved}
+                            onCancel={() => { setInvoiceEditorOpen(false); setEditingInvoice(null); }}
+                        />
                     </div>
                 </DialogContent>
             </Dialog>

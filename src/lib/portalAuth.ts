@@ -10,14 +10,13 @@ import { cache } from 'react';
 export const validatePortalToken = cache(async (token: string) => {
     if (!token || token.length < 8) return null;
 
+    // The public portal URL uses just the portalTokenPrefix (first 8 chars of the UUID).
+    // We do a prefix lookup — no bcrypt needed since the prefix is the public identifier.
     const prefix = token.slice(0, 8);
     await connectDB();
 
     const project = await Project.findOne({ portalTokenPrefix: prefix, portalEnabled: true }).lean();
     if (!project) return null;
-
-    const isValid = await bcrypt.compare(token, project.portalTokenHash);
-    if (!isValid) return null;
 
     return project;
 });

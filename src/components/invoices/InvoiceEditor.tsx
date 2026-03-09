@@ -343,34 +343,60 @@ export function InvoiceEditor({ projectId, project, initialData, onSuccess, onCa
                     <div className="glass-card p-5 sm:p-6 space-y-5 rounded-2xl xl:sticky xl:top-20" style={{ borderColor: 'var(--border-medium)', background: 'var(--surface)' }}>
                         <h3 className="text-base font-bold" style={{ color: 'var(--text-primary)' }}>Summary</h3>
 
-                        <div className="space-y-3">
-                            <div className="flex justify-between text-sm">
+                        <div className="space-y-4">
+                            <div className="flex justify-between text-sm py-1">
                                 <span style={{ color: 'var(--text-secondary)' }}>Subtotal</span>
-                                <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{totals.subtotal.toFixed(2)}</span>
+                                <span className="font-bold tabular-nums" style={{ color: 'var(--text-primary)' }}>{totals.subtotal.toFixed(2)}</span>
                             </div>
 
-                            <div className="flex justify-between items-center text-sm gap-4">
-                                <span style={{ color: 'var(--text-secondary)' }}>Tax Rate (%)</span>
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
+                                    Tax Rate (%)
+                                </label>
                                 <Input
                                     type="number"
+                                    step="0.1"
+                                    min="0"
+                                    max="100"
+                                    placeholder="0"
                                     {...register("taxRate", { valueAsNumber: true })}
-                                    className="w-24 h-8 text-right text-sm"
+                                    className="input-base h-10 text-sm"
                                 />
                             </div>
 
-                            <div className="flex justify-between items-center text-sm gap-4">
-                                <span style={{ color: 'var(--text-secondary)' }}>Discount</span>
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
+                                    Discount ({watch('currency') || 'USD'})
+                                </label>
                                 <Input
                                     type="number"
+                                    step="0.01"
+                                    min="0"
+                                    placeholder="0.00"
                                     {...register("discount", { valueAsNumber: true })}
-                                    className="w-24 h-8 text-right text-sm"
+                                    className="input-base h-10 text-sm"
                                 />
                             </div>
 
-                            <div className="pt-3" style={{ borderTop: '1px solid var(--border-medium)' }}>
-                                <div className="flex justify-between items-center">
+                            <div
+                                className="pt-3 space-y-1"
+                                style={{ borderTop: '1px solid var(--border-medium)' }}
+                            >
+                                {totals.taxAmount > 0 && (
+                                    <div className="flex justify-between text-xs">
+                                        <span style={{ color: 'var(--text-muted)' }}>Tax ({watchedTaxRate}%)</span>
+                                        <span className="tabular-nums" style={{ color: 'var(--text-secondary)' }}>+{totals.taxAmount.toFixed(2)}</span>
+                                    </div>
+                                )}
+                                {watchedDiscount > 0 && (
+                                    <div className="flex justify-between text-xs">
+                                        <span style={{ color: 'var(--text-muted)' }}>Discount</span>
+                                        <span className="tabular-nums" style={{ color: 'var(--success)' }}>−{watchedDiscount.toFixed(2)}</span>
+                                    </div>
+                                )}
+                                <div className="flex justify-between items-center pt-2">
                                     <span className="text-base font-bold" style={{ color: 'var(--text-primary)' }}>Total</span>
-                                    <span className="text-2xl font-black" style={{ color: 'var(--accent)' }}>
+                                    <span className="text-2xl font-black tabular-nums" style={{ color: 'var(--accent)' }}>
                                         {new Intl.NumberFormat('en-US', {
                                             style: 'currency',
                                             currency: watch('currency') || 'USD'

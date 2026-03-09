@@ -31,6 +31,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
 import type { InvoiceRecord } from '@/lib/contracts';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 // Glass Components
 import { GlassCard } from '@/components/glass/GlassCard';
@@ -48,6 +49,11 @@ interface InvoiceListProps {
 export function InvoiceList({ projectId, refreshTrigger, onEdit, onRefresh, onCreate }: InvoiceListProps) {
     const [invoices, setInvoices] = useState<InvoiceRecord[]>([]);
     const [loading, setLoading] = useState(true);
+    const [confirmDialog, setConfirmDialog] = useState<{
+        open: boolean;
+        type: 'send' | 'delete';
+        invoiceId: string;
+    }>({ open: false, type: 'send', invoiceId: '' });
 
     const fetchInvoices = async () => {
         setLoading(true);
@@ -67,16 +73,36 @@ export function InvoiceList({ projectId, refreshTrigger, onEdit, onRefresh, onCr
         fetchInvoices();
     }, [projectId, refreshTrigger]);
 
-    const handleSend = async (invoiceId: string) => {
-        if (!confirm('Send this invoice to the client?')) return;
-        try {
-            const res = await fetch(`/api/projects/${projectId}/invoices/${invoiceId}/send`, { method: 'POST' });
-            if (!res.ok) throw new Error('Send failed');
-            toast.success('Invoice sent to client');
-            onRefresh();
-            fetchInvoices();
-        } catch (error) {
-            toast.error('Could not send invoice');
+    const handleSend = (invoiceId: string) => {
+        setConfirmDialog({ open: true, type: 'send', invoiceId });
+    };
+
+    const handleDelete = (invoiceId: string) => {
+        setConfirmDialog({ open: true, type: 'delete', invoiceId });
+    };
+
+    const executeConfirm = async () => {
+        const { type, invoiceId } = confirmDialog;
+        if (type === 'send') {
+            try {
+                const res = await fetch(`/api/projects/${projectId}/invoices/${invoiceId}/send`, { method: 'POST' });
+                if (!res.ok) throw new Error('Send failed');
+                toast.success('Invoice sent to client');
+                onRefresh();
+                fetchInvoices();
+            } catch {
+                toast.error('Could not send invoice');
+            }
+        } else {
+            try {
+                const res = await fetch(`/api/projects/${projectId}/invoices/${invoiceId}`, { method: 'DELETE' });
+                if (!res.ok) throw new Error('Delete failed');
+                toast.success('Invoice deleted');
+                onRefresh();
+                fetchInvoices();
+            } catch {
+                toast.error('Could not delete invoice');
+            }
         }
     };
 
@@ -89,19 +115,6 @@ export function InvoiceList({ projectId, refreshTrigger, onEdit, onRefresh, onCr
             fetchInvoices();
         } catch (error) {
             toast.error('Could not update invoice');
-        }
-    };
-
-    const handleDelete = async (invoiceId: string) => {
-        if (!confirm('Delete this draft invoice?')) return;
-        try {
-            const res = await fetch(`/api/projects/${projectId}/invoices/${invoiceId}`, { method: 'DELETE' });
-            if (!res.ok) throw new Error('Delete failed');
-            toast.success('Invoice deleted');
-            onRefresh();
-            fetchInvoices();
-        } catch (error) {
-            toast.error('Could not delete invoice');
         }
     };
 
@@ -151,6 +164,19 @@ export function InvoiceList({ projectId, refreshTrigger, onEdit, onRefresh, onCr
 
     return (
         <GlassCard className="p-0 overflow-hidden" style={{ borderColor: 'var(--border-medium)' }}>
+            <ConfirmDialog
+                open={confirmDialog.open}
+                onOpenChange={(open) => setConfirmDialog(s => ({ ...s, open }))}
+                title={confirmDialog.type === 'send' ? 'Send Invoice' : 'Delete Invoice'}
+                description={
+                    confirmDialog.type === 'send'
+                        ? 'This will email the invoice to the client. They\'ll be able to view it via the portal.'
+                        : 'This draft will be permanently deleted. This action cannot be undone.'
+                }
+                confirmLabel={confirmDialog.type === 'send' ? 'Send Invoice' : 'Delete'}
+                variant={confirmDialog.type === 'delete' ? 'destructive' : 'default'}
+                onConfirm={executeConfirm}
+            />
             <div className="overflow-x-auto">
             <Table>
                 <TableHeader style={{ background: 'var(--surface-muted)', borderBottom: '1px solid var(--border-subtle)' }}>

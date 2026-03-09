@@ -39,6 +39,7 @@ import { GlassCard } from '@/components/glass/GlassCard';
 import { GlassInput } from '@/components/glass/GlassInput';
 import { GlassButton } from '@/components/glass/GlassButton';
 import { GlassBadge } from '@/components/glass/GlassBadge';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 interface Milestone {
     _id: string;
@@ -59,6 +60,7 @@ export function MilestoneTracker({ projectId, initialMilestones, onUpdate }: Mil
     const [newMilestoneTitle, setNewMilestoneTitle] = useState('');
     const [isAdding, setIsAdding] = useState(false);
     const [isReordering, setIsReordering] = useState(false);
+    const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string }>({ open: false, id: '' });
 
     useEffect(() => {
         setMilestones(initialMilestones);
@@ -137,7 +139,10 @@ export function MilestoneTracker({ projectId, initialMilestones, onUpdate }: Mil
     };
 
     const deleteMilestone = async (id: string) => {
-        if (!confirm('Delete this milestone?')) return;
+        setDeleteConfirm({ open: true, id });
+    };
+
+    const executeDeleteMilestone = async (id: string) => {
         try {
             const res = await fetch(`/api/projects/${projectId}/milestones/${id}`, {
                 method: 'DELETE'
@@ -152,6 +157,15 @@ export function MilestoneTracker({ projectId, initialMilestones, onUpdate }: Mil
 
     return (
         <div className="space-y-8">
+            <ConfirmDialog
+                open={deleteConfirm.open}
+                onOpenChange={(open) => setDeleteConfirm(s => ({ ...s, open }))}
+                title="Delete Milestone"
+                description="This milestone will be permanently removed. This action cannot be undone."
+                confirmLabel="Delete"
+                variant="destructive"
+                onConfirm={() => executeDeleteMilestone(deleteConfirm.id)}
+            />
             <div className="flex items-center justify-between">
                 <div className="space-y-1">
                     <h3 className="text-2xl font-black tracking-tight">Project Roadmap</h3>
