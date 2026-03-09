@@ -571,3 +571,167 @@
   transition: border-color 0.15s ease;
 }
 .empty-state:hover { border-color: var(--border-accent); }
+
+/* ══════════════════════════════════════════════════════════
+   FORM & COMPONENT THEME FIXES
+══════════════════════════════════════════════════════════ */
+
+/* Ensure all inputs/selects/textareas pick up theme colors */
+input, textarea, select {
+  color: var(--text-primary);
+  background: var(--input);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted) !important;
+  opacity: 1;
+}
+
+/* Calendar inside popovers */
+[data-slot="calendar"] {
+  background: var(--popover) !important;
+  color: var(--popover-foreground) !important;
+}
+[data-slot="calendar"] button {
+  color: var(--text-primary);
+}
+[data-slot="calendar"] .rdp-day_selected button,
+[data-slot="calendar"] button[data-selected-single="true"] {
+  background: var(--accent) !important;
+  color: var(--primary-foreground) !important;
+}
+[data-slot="calendar"] button[data-today="true"]:not([data-selected-single="true"]) {
+  background: var(--accent-light) !important;
+  color: var(--accent) !important;
+}
+
+/* Dropdown menus */
+[data-slot="dropdown-menu-content"] {
+  background: var(--popover) !important;
+  border-color: var(--border-medium) !important;
+  color: var(--popover-foreground) !important;
+}
+
+/* Dialog/modal overlay & content */
+[data-slot="dialog-content"] {
+  background: var(--surface) !important;
+  border-color: var(--border-medium) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Tabs */
+[data-slot="tabs-list"] {
+  background: var(--surface-muted) !important;
+  border-color: var(--border-subtle) !important;
+}
+[data-slot="tabs-trigger"] {
+  color: var(--text-secondary) !important;
+}
+[data-slot="tabs-trigger"][data-state="active"] {
+  color: var(--accent) !important;
+  background: var(--accent-light) !important;
+}
+
+/* Button outline variant — theme aware */
+[data-variant="outline"] {
+  background: var(--surface) !important;
+  border-color: var(--border-medium) !important;
+  color: var(--text-primary) !important;
+}
+[data-variant="outline"]:hover {
+  background: var(--surface-hover) !important;
+}
+
+/* Ghost button */
+[data-variant="ghost"]:hover {
+  background: var(--surface-hover) !important;
+  color: var(--text-primary) !important;
+}
+
+/* glass-input helper (used in ApprovalForm/FileGrid) */
+.glass-input {
+  background: var(--input) !important;
+  border-color: var(--border-medium) !important;
+  color: var(--text-primary) !important;
+  border-radius: 0.75rem !important;
+}
+.glass-input::placeholder {
+  color: var(--text-muted) !important;
+}
+
+/* glass-textarea helper */
+.glass-textarea {
+  background: var(--input) !important;
+  border-color: var(--border-medium) !important;
+  color: var(--text-primary) !important;
+  border-radius: 0.75rem !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   RESPONSIVENESS FIXES
+══════════════════════════════════════════════════════════ */
+
+/* Prevent forms from overflowing on small screens */
+.glass-card {
+  overflow: visible;
+}
+
+/* Portal tabs — scroll on mobile */
+[data-slot="tabs-list"] {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+[data-slot="tabs-list"]::-webkit-scrollbar { display: none; }
+
+/* Project detail tabs — full width on mobile */
+@media (max-width: 640px) {
+  [data-slot="tabs-list"] {
+    width: 100% !important;
+    justify-content: stretch;
+  }
+  [data-slot="tabs-trigger"] {
+    flex: 1;
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  /* Invoice editor line items — stack on mobile */
+  .line-item-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  /* Approval form grid  */
+  .approval-form-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Summary panel — not sticky on mobile, comes after form */
+  .summary-sticky {
+    position: static !important;
+  }
+}
+
+/* Better touch targets on mobile */
+@media (max-width: 768px) {
+  button, [role="button"] {
+    min-height: 40px;
+  }
+  select, input, textarea {
+    font-size: 16px; /* Prevent iOS zoom on focus */
+  }
+}
+
+/* Fix modal overflow on mobile */
+@media (max-width: 640px) {
+  [data-slot="dialog-content"] {
+    margin: 1rem !important;
+    max-height: calc(100dvh - 2rem) !important;
+    overflow-y: auto !important;
+    border-radius: 1.25rem !important;
+  }
+}

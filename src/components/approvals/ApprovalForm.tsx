@@ -11,7 +11,6 @@ import {
     SelectTrigger,
     SelectValue
 } from '@/components/ui/select';
-import { toast } from 'sonner';
 import { Send, Loader2 } from 'lucide-react';
 import type { FileListResponse, FileRecord } from '@/lib/contracts';
 
@@ -92,7 +91,7 @@ export function ApprovalForm({ projectId, isOpen, onClose, onSuccess }: Approval
 
     return (
         <GlassModal isOpen={isOpen} onClose={onClose} title="Request Client Approval">
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 <GlassInput
                     label="Request Title"
                     placeholder="e.g., V1 Brand Strategy Deck"
@@ -100,63 +99,68 @@ export function ApprovalForm({ projectId, isOpen, onClose, onSuccess }: Approval
                     error={errors.title?.message}
                 />
 
-                <div className="grid grid-cols-2 gap-6">
-                    <div className="space-y-3">
-                        <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Asset Category</label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-[0.2em] ml-1">Asset Category</label>
                         <Select
                             onValueChange={(val) => setValue('type', val as ApprovalFormValues['type'])}
                             defaultValue="file"
                         >
-                            <SelectTrigger className="h-14 border-none bg-white/5 hover:bg-white/10 px-6 rounded-2xl font-bold text-sm ring-0 focus:ring-0">
+                            <SelectTrigger className="h-10 rounded-xl">
                                 <SelectValue placeholder="Select type" />
                             </SelectTrigger>
-                            <SelectContent className="glass-card border-white/10 rounded-2xl p-2 shadow-2xl">
-                                <SelectItem value="file" className="rounded-xl focus:bg-indigo-600/10 font-bold">File Asset</SelectItem>
-                                <SelectItem value="milestone" className="rounded-xl focus:bg-indigo-600/10 font-bold">Milestone</SelectItem>
-                                <SelectItem value="design" className="rounded-xl focus:bg-indigo-600/10 font-bold">Design Mockup</SelectItem>
-                                <SelectItem value="copy" className="rounded-xl focus:bg-indigo-600/10 font-bold">Copy/Content</SelectItem>
-                                <SelectItem value="other" className="rounded-xl focus:bg-indigo-600/10 font-bold">Other</SelectItem>
+                            <SelectContent>
+                                <SelectItem value="file">File Asset</SelectItem>
+                                <SelectItem value="milestone">Milestone</SelectItem>
+                                <SelectItem value="design">Design Mockup</SelectItem>
+                                <SelectItem value="copy">Copy/Content</SelectItem>
+                                <SelectItem value="other">Other</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
 
-                    <div className="space-y-3">
-                        <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Reference File</label>
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-[0.2em] ml-1">Reference File</label>
                         <Select onValueChange={(val) => setValue('fileId', val)}>
-                            <SelectTrigger className="h-14 border-none bg-white/5 hover:bg-white/10 px-6 rounded-2xl font-bold text-sm ring-0 focus:ring-0">
+                            <SelectTrigger className="h-10 rounded-xl">
                                 <SelectValue placeholder="Link asset..." />
                             </SelectTrigger>
-                            <SelectContent className="glass-card border-white/10 rounded-2xl p-2 shadow-2xl">
+                            <SelectContent>
                                 {files.map(f => (
-                                    <SelectItem key={f._id} value={f._id} className="rounded-xl focus:bg-indigo-600/10 font-bold">
+                                    <SelectItem key={f._id} value={f._id}>
                                         {f.originalName}
                                     </SelectItem>
                                 ))}
-                                {files.length === 0 && <p className="p-4 text-xs text-[var(--text-muted)] italic text-white/40 font-bold">No files found</p>}
+                                {files.length === 0 && <p className="p-3 text-xs italic" style={{ color: 'var(--text-muted)' }}>No files found</p>}
                             </SelectContent>
                         </Select>
                     </div>
                 </div>
 
-                <div className="space-y-3">
-                    <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Request Details</label>
+                <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-[0.2em] ml-1">Request Details</label>
                     <textarea
                         placeholder="Provide context for the client..."
                         {...register('description')}
-                        className="w-full h-32 bg-white/5 border border-white/5 rounded-2xl p-5 text-white placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all font-medium leading-relaxed"
+                        className="w-full h-28 rounded-xl p-4 text-sm font-medium leading-relaxed focus:outline-none focus:ring-2 transition-all resize-none"
+                        style={{
+                            background: 'var(--input)',
+                            border: '1.5px solid var(--border-medium)',
+                            color: 'var(--text-primary)',
+                        }}
                     />
                 </div>
 
-                <div className="flex gap-4 pt-4">
-                    <GlassButton variant="secondary" onClick={onClose} type="button" className="flex-1 h-14 rounded-2xl">
+                <div className="flex gap-3 pt-2">
+                    <GlassButton variant="secondary" onClick={onClose} type="button" className="flex-1 h-11 rounded-xl">
                         Discard
                     </GlassButton>
                     <GlassButton
                         type="submit"
                         disabled={isSubmitting}
-                        className="flex-[2] h-14 rounded-2xl px-12"
+                        className="flex-[2] h-11 rounded-xl"
                     >
-                        {isSubmitting ? <Loader2 className="animate-spin" /> : <><Send size={18} className="mr-2" /> Send Request</>}
+                        {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : <><Send size={16} className="mr-1.5" /> Send Request</>}
                     </GlassButton>
                 </div>
             </form>

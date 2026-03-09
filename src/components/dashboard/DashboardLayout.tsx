@@ -3,7 +3,6 @@
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import { Search, User, LogOut, CreditCard, X, ChevronDown } from 'lucide-react';
-import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { GlassNav } from '@/components/dashboard/GlassNav';
 import { NotificationBell } from '@/components/dashboard/NotificationBell';
@@ -49,11 +48,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     <div style={{ minHeight: '100vh', background: 'var(--canvas)' }}>
       <GlassNav />
 
-      <motion.div
-        initial={false}
-        animate={{ paddingLeft: sidebarOpen ? 240 : 64 }}
-        transition={{ duration: 0.26, ease: [0.4, 0, 0.2, 1] }}
-        className="min-h-screen pb-24 md:pb-0"
+      <div
+        className={`min-h-screen pb-24 md:pb-0 transition-[padding-left] duration-[260ms] ease-[cubic-bezier(0.4,0,0.2,1)] md:${sidebarOpen ? 'pl-[240px]' : 'pl-[64px]'}`}
       >
         {/* ── Top header ── */}
         <header
@@ -185,7 +181,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* ── Main content ── */}
-        <main className="relative p-5 lg:p-7">
+        <main className="relative p-4 sm:p-5 lg:p-7">
           <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden>
             <div
               className="ambient-blob"
@@ -198,7 +194,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           </div>
           <div className="relative max-w-7xl mx-auto">{children}</div>
         </main>
-      </motion.div>
+      </div>
     </div>
   );
 }

@@ -140,17 +140,17 @@ export function InvoiceEditor({ projectId, project, initialData, onSuccess, onCa
     };
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 animate-in fade-in duration-500">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 animate-in fade-in duration-500">
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
                 {/* Left Column: Form */}
-                <div className="lg:col-span-2 space-y-8">
-                    <div className="glass-card p-6 space-y-6">
-                        <h3 className="text-lg font-bold flex items-center gap-2">
-                            <Calculator className="text-indigo-400" size={20} />
+                <div className="xl:col-span-2 space-y-6">
+                    <div className="glass-card p-5 sm:p-6 space-y-5 rounded-2xl" style={{ borderColor: 'var(--border-medium)' }}>
+                        <h3 className="text-base font-bold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+                            <Calculator style={{ color: 'var(--accent)' }} size={18} />
                             General Details
                         </h3>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label>Issue Date</Label>
                                 <Controller
@@ -162,15 +162,20 @@ export function InvoiceEditor({ projectId, project, initialData, onSuccess, onCa
                                                 <Button
                                                     variant={"outline"}
                                                     className={cn(
-                                                        "w-full justify-start text-left font-normal glass-card border-white/5",
+                                                        "w-full justify-start text-left font-normal h-10 rounded-xl",
                                                         !field.value && "text-muted-foreground"
                                                     )}
+                                                    style={{
+                                                        background: 'var(--input)',
+                                                        borderColor: 'var(--border-medium)',
+                                                        color: field.value ? 'var(--text-primary)' : 'var(--text-muted)',
+                                                    }}
                                                 >
-                                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                                    <CalendarIcon className="mr-2 h-4 w-4" style={{ color: 'var(--text-muted)' }} />
                                                     {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
                                                 </Button>
                                             </PopoverTrigger>
-                                            <PopoverContent className="w-auto p-0 border-white/10" align="start">
+                                            <PopoverContent className="w-auto p-0" align="start">
                                                 <Calendar
                                                     mode="single"
                                                     selected={field.value}
@@ -194,15 +199,20 @@ export function InvoiceEditor({ projectId, project, initialData, onSuccess, onCa
                                                 <Button
                                                     variant={"outline"}
                                                     className={cn(
-                                                        "w-full justify-start text-left font-normal glass-card border-white/5",
+                                                        "w-full justify-start text-left font-normal h-10 rounded-xl",
                                                         !field.value && "text-muted-foreground"
                                                     )}
+                                                    style={{
+                                                        background: 'var(--input)',
+                                                        borderColor: 'var(--border-medium)',
+                                                        color: field.value ? 'var(--text-primary)' : 'var(--text-muted)',
+                                                    }}
                                                 >
-                                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                                    <CalendarIcon className="mr-2 h-4 w-4" style={{ color: 'var(--text-muted)' }} />
                                                     {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
                                                 </Button>
                                             </PopoverTrigger>
-                                            <PopoverContent className="w-auto p-0 border-white/10" align="start">
+                                            <PopoverContent className="w-auto p-0" align="start">
                                                 <Calendar
                                                     mode="single"
                                                     selected={field.value}
@@ -222,10 +232,10 @@ export function InvoiceEditor({ projectId, project, initialData, onSuccess, onCa
                                     name="currency"
                                     render={({ field }) => (
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                            <SelectTrigger className="glass-card border-white/5">
+                                            <SelectTrigger>
                                                 <SelectValue placeholder="Select currency" />
                                             </SelectTrigger>
-                                            <SelectContent className="glass-card border-white/10">
+                                            <SelectContent>
                                                 <SelectItem value="USD">USD ($)</SelectItem>
                                                 <SelectItem value="EUR">EUR (€)</SelectItem>
                                                 <SelectItem value="GBP">GBP (£)</SelectItem>
@@ -238,69 +248,79 @@ export function InvoiceEditor({ projectId, project, initialData, onSuccess, onCa
 
                             <div className="space-y-2">
                                 <Label>Bill To</Label>
-                                <div className="p-3 bg-white/5 rounded-xl border border-white/5 text-sm">
-                                    <p className="font-bold">{project.clientName}</p>
-                                    <p className="text-[var(--text-muted)]">{project.clientEmail}</p>
+                                <div className="h-10 px-3 flex flex-col justify-center rounded-xl border text-sm"
+                                    style={{ background: 'var(--surface-muted)', borderColor: 'var(--border-medium)' }}>
+                                    <p className="font-semibold leading-tight" style={{ color: 'var(--text-primary)' }}>{project.clientName}</p>
+                                    <p className="text-xs leading-tight" style={{ color: 'var(--text-muted)' }}>{project.clientEmail}</p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="glass-card p-6 space-y-6">
+                    <div className="glass-card p-5 sm:p-6 space-y-5 rounded-2xl" style={{ borderColor: 'var(--border-medium)' }}>
                         <div className="flex items-center justify-between">
-                            <h3 className="text-lg font-bold">Line Items</h3>
+                            <h3 className="text-base font-bold" style={{ color: 'var(--text-primary)' }}>Line Items</h3>
                             <Button
                                 type="button"
                                 variant="outline"
                                 size="sm"
                                 onClick={() => append({ description: '', quantity: 1, rate: 0 })}
-                                className="gap-2 border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/10"
+                                className="gap-1.5 rounded-xl text-xs font-semibold"
+                                style={{ borderColor: 'var(--border-accent)', color: 'var(--accent)', background: 'var(--accent-light)' }}
                             >
-                                <Plus size={16} /> Add Item
+                                <Plus size={14} /> Add Item
                             </Button>
                         </div>
 
-                        <div className="space-y-4">
+                        {/* Column headers */}
+                        <div className="hidden sm:grid grid-cols-12 gap-3 px-1">
+                            <span className="col-span-6 text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Description</span>
+                            <span className="col-span-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Qty</span>
+                            <span className="col-span-3 text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Rate</span>
+                        </div>
+
+                        <div className="space-y-3">
                             {fields.map((field, index) => (
-                                <div key={field.id} className="grid grid-cols-12 gap-3 items-start animate-in slide-in-from-left-2 duration-300" style={{ animationDelay: `${index * 50}ms` }}>
-                                    <div className="col-span-6 space-y-2">
+                                <div key={field.id} className="grid grid-cols-12 gap-2 sm:gap-3 items-start" style={{ animationDelay: `${index * 50}ms` }}>
+                                    <div className="col-span-12 sm:col-span-6 space-y-1">
+                                        <label className="sm:hidden text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Description</label>
                                         <Input
                                             placeholder="Item description"
                                             {...register(`lineItems.${index}.description` as const)}
-                                            className="glass-input"
                                         />
                                         {errors.lineItems?.[index]?.description && (
-                                            <p className="text-[10px] text-red-400">{errors.lineItems[index]?.description?.message}</p>
+                                            <p className="text-[10px]" style={{ color: 'var(--destructive)' }}>{errors.lineItems[index]?.description?.message}</p>
                                         )}
                                     </div>
-                                    <div className="col-span-2 space-y-2">
+                                    <div className="col-span-4 sm:col-span-2 space-y-1">
+                                        <label className="sm:hidden text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Qty</label>
                                         <Input
                                             type="number"
                                             step="0.01"
-                                            placeholder="Qty"
+                                            placeholder="1"
                                             {...register(`lineItems.${index}.quantity` as const, { valueAsNumber: true })}
-                                            className="glass-input"
                                         />
                                     </div>
-                                    <div className="col-span-3 space-y-2">
+                                    <div className="col-span-6 sm:col-span-3 space-y-1">
+                                        <label className="sm:hidden text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Rate</label>
                                         <Input
                                             type="number"
                                             step="0.01"
-                                            placeholder="Rate"
+                                            placeholder="0.00"
                                             {...register(`lineItems.${index}.rate` as const, { valueAsNumber: true })}
-                                            className="glass-input"
                                         />
                                     </div>
-                                    <div className="col-span-1 pt-2">
+                                    <div className="col-span-2 sm:col-span-1 flex items-end pb-0.5 h-full justify-end">
                                         <Button
                                             type="button"
                                             variant="ghost"
                                             size="icon"
                                             onClick={() => remove(index)}
-                                            className="text-red-400 hover:bg-red-500/10 h-8 w-8"
+                                            className="h-10 w-10 rounded-xl"
+                                            style={{ color: 'var(--destructive)' }}
                                             disabled={fields.length === 1}
                                         >
-                                            <Trash2 size={16} />
+                                            <Trash2 size={15} />
                                         </Button>
                                     </div>
                                 </div>
@@ -308,53 +328,49 @@ export function InvoiceEditor({ projectId, project, initialData, onSuccess, onCa
                         </div>
                     </div>
 
-                    <div className="glass-card p-6 space-y-4">
+                    <div className="glass-card p-5 sm:p-6 space-y-3 rounded-2xl" style={{ borderColor: 'var(--border-medium)' }}>
                         <Label>Notes & Terms</Label>
                         <Textarea
                             placeholder="Bank details, payment terms, or a thank you note..."
                             {...register("notes")}
-                            className="glass-textarea min-h-[100px]"
+                            className="min-h-[100px] rounded-xl"
                         />
                     </div>
                 </div>
 
-                {/* Right Column: Totals & Summary */}
-                <div className="lg:col-span-1 space-y-8">
-                    <div className="glass-card p-6 space-y-6 sticky top-8 bg-indigo-500/5">
-                        <h3 className="text-lg font-bold">Summary</h3>
+                {/* Right Column: Summary */}
+                <div className="xl:col-span-1">
+                    <div className="glass-card p-5 sm:p-6 space-y-5 rounded-2xl xl:sticky xl:top-20" style={{ borderColor: 'var(--border-medium)', background: 'var(--surface)' }}>
+                        <h3 className="text-base font-bold" style={{ color: 'var(--text-primary)' }}>Summary</h3>
 
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                             <div className="flex justify-between text-sm">
-                                <span className="text-[var(--text-secondary)]">Subtotal</span>
-                                <span className="font-medium">{totals.subtotal.toFixed(2)}</span>
+                                <span style={{ color: 'var(--text-secondary)' }}>Subtotal</span>
+                                <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{totals.subtotal.toFixed(2)}</span>
                             </div>
 
-                            <div className="space-y-2">
-                                <div className="flex justify-between items-center text-sm">
-                                    <span className="text-[var(--text-secondary)]">Tax Rate (%)</span>
-                                    <Input
-                                        type="number"
-                                        {...register("taxRate", { valueAsNumber: true })}
-                                        className="w-20 glass-input h-8 text-right"
-                                    />
-                                </div>
+                            <div className="flex justify-between items-center text-sm gap-4">
+                                <span style={{ color: 'var(--text-secondary)' }}>Tax Rate (%)</span>
+                                <Input
+                                    type="number"
+                                    {...register("taxRate", { valueAsNumber: true })}
+                                    className="w-24 h-8 text-right text-sm"
+                                />
                             </div>
 
-                            <div className="space-y-2">
-                                <div className="flex justify-between items-center text-sm">
-                                    <span className="text-[var(--text-secondary)]">Discount</span>
-                                    <Input
-                                        type="number"
-                                        {...register("discount", { valueAsNumber: true })}
-                                        className="w-20 glass-input h-8 text-right"
-                                    />
-                                </div>
+                            <div className="flex justify-between items-center text-sm gap-4">
+                                <span style={{ color: 'var(--text-secondary)' }}>Discount</span>
+                                <Input
+                                    type="number"
+                                    {...register("discount", { valueAsNumber: true })}
+                                    className="w-24 h-8 text-right text-sm"
+                                />
                             </div>
 
-                            <div className="pt-4 border-t border-white/5">
+                            <div className="pt-3" style={{ borderTop: '1px solid var(--border-medium)' }}>
                                 <div className="flex justify-between items-center">
-                                    <span className="text-lg font-bold">Total</span>
-                                    <span className="text-2xl font-black text-indigo-400">
+                                    <span className="text-base font-bold" style={{ color: 'var(--text-primary)' }}>Total</span>
+                                    <span className="text-2xl font-black" style={{ color: 'var(--accent)' }}>
                                         {new Intl.NumberFormat('en-US', {
                                             style: 'currency',
                                             currency: watch('currency') || 'USD'
@@ -364,19 +380,21 @@ export function InvoiceEditor({ projectId, project, initialData, onSuccess, onCa
                             </div>
                         </div>
 
-                        <div className="flex flex-col gap-3 pt-6">
+                        <div className="flex flex-col gap-3 pt-2">
                             <Button
                                 type="submit"
-                                className="bg-indigo-600 hover:bg-indigo-700 h-12 rounded-xl font-bold shadow-lg shadow-indigo-500/20 gap-2"
+                                className="h-11 rounded-xl font-bold gap-2"
+                                style={{ background: 'var(--accent-gradient)', color: 'var(--primary-foreground)', boxShadow: 'var(--glow-sm)' }}
                                 disabled={isSubmitting}
                             >
-                                {isSubmitting ? 'Saving...' : <><Save size={18} /> Save Draft</>}
+                                {isSubmitting ? 'Saving...' : <><Save size={16} /> Save Draft</>}
                             </Button>
                             <Button
                                 type="button"
                                 variant="outline"
                                 onClick={onCancel}
-                                className="glass-card border-white/5 h-12 rounded-xl"
+                                className="h-11 rounded-xl font-semibold"
+                                style={{ borderColor: 'var(--border-medium)', color: 'var(--text-secondary)', background: 'var(--surface)' }}
                             >
                                 Cancel
                             </Button>

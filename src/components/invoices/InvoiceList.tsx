@@ -127,19 +127,19 @@ export function InvoiceList({ projectId, refreshTrigger, onEdit, onRefresh, onCr
     if (loading && invoices.length === 0) {
         return (
             <div className="space-y-4">
-                {[1, 2, 3].map(i => <div key={i} className="h-16 w-full glass-card animate-pulse rounded-2xl bg-white/5" />)}
+                {[1, 2, 3].map(i => <div key={i} className="h-16 w-full glass-card animate-pulse rounded-2xl skeleton" />)}
             </div>
         );
     }
 
     if (invoices.length === 0) {
         return (
-            <div className="text-center py-32 glass-card bg-transparent border-dashed border-white/5 rounded-3xl">
-                <div className="bg-white/5 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <DollarSign size={32} className="text-[var(--text-muted)]" />
+            <div className="text-center py-24 glass-card rounded-3xl" style={{ borderStyle: 'dashed', borderColor: 'var(--border-medium)' }}>
+                <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: 'var(--surface-muted)' }}>
+                    <DollarSign size={28} style={{ color: 'var(--text-muted)' }} />
                 </div>
-                <h4 className="text-white font-bold mb-1">No invoices found</h4>
-                <p className="text-[var(--text-muted)] text-sm">Create your first invoice to start getting paid.</p>
+                <h4 className="font-bold mb-1" style={{ color: 'var(--text-primary)' }}>No invoices found</h4>
+                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Create your first invoice to start getting paid.</p>
                 {onCreate && (
                     <div className="mt-6">
                         <GlassButton onClick={onCreate}>Create Invoice</GlassButton>
@@ -150,69 +150,70 @@ export function InvoiceList({ projectId, refreshTrigger, onEdit, onRefresh, onCr
     }
 
     return (
-        <GlassCard className="p-0 overflow-hidden border-white/5">
+        <GlassCard className="p-0 overflow-hidden" style={{ borderColor: 'var(--border-medium)' }}>
+            <div className="overflow-x-auto">
             <Table>
-                <TableHeader className="bg-white/5 border-b border-white/5">
+                <TableHeader style={{ background: 'var(--surface-muted)', borderBottom: '1px solid var(--border-subtle)' }}>
                     <TableRow className="hover:bg-transparent border-none">
-                        <TableHead className="w-[140px] px-6 h-14 font-black text-[10px] uppercase tracking-widest text-white/40">Invoice #</TableHead>
-                        <TableHead className="px-6 h-14 font-black text-[10px] uppercase tracking-widest text-white/40">Amount</TableHead>
-                        <TableHead className="px-6 h-14 font-black text-[10px] uppercase tracking-widest text-white/40">Status</TableHead>
-                        <TableHead className="px-6 h-14 font-black text-[10px] uppercase tracking-widest text-white/40">Due Date</TableHead>
-                        <TableHead className="text-right px-6 h-14 font-black text-[10px] uppercase tracking-widest text-white/40">Actions</TableHead>
+                        <TableHead className="w-[140px] px-4 sm:px-6 h-12 font-bold text-[10px] uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Invoice #</TableHead>
+                        <TableHead className="px-4 sm:px-6 h-12 font-bold text-[10px] uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Amount</TableHead>
+                        <TableHead className="px-4 sm:px-6 h-12 font-bold text-[10px] uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Status</TableHead>
+                        <TableHead className="hidden sm:table-cell px-4 sm:px-6 h-12 font-bold text-[10px] uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Due Date</TableHead>
+                        <TableHead className="text-right px-4 sm:px-6 h-12 font-bold text-[10px] uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Actions</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {invoices.map((invoice) => (
-                        <TableRow key={invoice._id} className="border-white/5 hover:bg-white/5 transition-colors h-16">
-                            <TableCell className="font-bold px-6 text-white">{invoice.invoiceNumber}</TableCell>
-                            <TableCell className="font-black px-6 text-white text-base">
+                        <TableRow key={invoice._id} className="transition-colors h-14" style={{ borderColor: 'var(--border-subtle)' }}>
+                            <TableCell className="font-bold px-4 sm:px-6 text-sm" style={{ color: 'var(--text-primary)' }}>{invoice.invoiceNumber}</TableCell>
+                            <TableCell className="font-bold px-4 sm:px-6 text-sm" style={{ color: 'var(--text-primary)' }}>
                                 {new Intl.NumberFormat('en-US', {
                                     style: 'currency',
                                     currency: invoice.currency,
                                 }).format(invoice.total)}
                             </TableCell>
-                            <TableCell className="px-6">{getStatusBadge(invoice)}</TableCell>
-                            <TableCell className="text-[10px] text-[var(--text-muted)] font-black uppercase tracking-wider px-6">
+                            <TableCell className="px-4 sm:px-6">{getStatusBadge(invoice)}</TableCell>
+                            <TableCell className="hidden sm:table-cell text-xs font-semibold uppercase tracking-wider px-4 sm:px-6" style={{ color: 'var(--text-muted)' }}>
                                 {format(new Date(invoice.dueDate), 'MMM dd, yyyy')}
                             </TableCell>
-                            <TableCell className="text-right px-6">
+                            <TableCell className="text-right px-4 sm:px-6">
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                        <GlassButton variant="ghost" size="icon" className="h-10 w-10 hover:bg-white/10 rounded-xl transition-all">
-                                            <MoreVertical size={18} />
+                                        <GlassButton variant="ghost" size="icon" className="h-9 w-9 rounded-xl transition-all">
+                                            <MoreVertical size={16} />
                                         </GlassButton>
                                     </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end" className="glass-card border-white/10 p-2 min-w-[180px] shadow-2xl backdrop-blur-3xl">
-                                        <DropdownMenuItem onClick={() => handleDownloadPDF(invoice._id)} className="rounded-xl focus:bg-indigo-600/10 gap-3 px-4 py-2.5 font-bold text-xs">
-                                            <Eye size={16} className="text-indigo-400" /> Preview PDF
+                                    <DropdownMenuContent align="end" className="p-1.5 min-w-[180px]" style={{ background: 'var(--popover)', borderColor: 'var(--border-medium)', boxShadow: 'var(--shadow-modal)' }}>
+                                        <DropdownMenuItem onClick={() => handleDownloadPDF(invoice._id)} className="rounded-xl gap-2.5 px-3 py-2 text-xs font-semibold cursor-pointer" style={{ color: 'var(--text-primary)' }}>
+                                            <Eye size={14} style={{ color: 'var(--accent)' }} /> Preview PDF
                                         </DropdownMenuItem>
 
                                         {invoice.status === 'draft' && (
                                             <>
-                                                <DropdownMenuItem onClick={() => onEdit(invoice)} className="rounded-xl focus:bg-indigo-600/10 gap-3 px-4 py-2.5 font-bold text-xs">
-                                                    <Edit size={16} /> Edit Draft
+                                                <DropdownMenuItem onClick={() => onEdit(invoice)} className="rounded-xl gap-2.5 px-3 py-2 text-xs font-semibold cursor-pointer" style={{ color: 'var(--text-primary)' }}>
+                                                    <Edit size={14} /> Edit Draft
                                                 </DropdownMenuItem>
-                                                <DropdownMenuItem onClick={() => handleSend(invoice._id)} className="rounded-xl focus:bg-indigo-600/10 gap-3 px-4 py-2.5 font-bold text-xs text-indigo-400">
-                                                    <Send size={16} /> Send to Client
+                                                <DropdownMenuItem onClick={() => handleSend(invoice._id)} className="rounded-xl gap-2.5 px-3 py-2 text-xs font-semibold cursor-pointer" style={{ color: 'var(--accent)' }}>
+                                                    <Send size={14} /> Send to Client
                                                 </DropdownMenuItem>
                                             </>
                                         )}
 
                                         {invoice.status !== 'draft' && invoice.status !== 'paid' && (
-                                            <DropdownMenuItem onClick={() => handleMarkPaid(invoice._id)} className="rounded-xl focus:bg-indigo-600/10 gap-3 px-4 py-2.5 font-bold text-xs text-green-400">
-                                                <CheckCircle size={16} /> Mark as Paid
+                                            <DropdownMenuItem onClick={() => handleMarkPaid(invoice._id)} className="rounded-xl gap-2.5 px-3 py-2 text-xs font-semibold cursor-pointer" style={{ color: 'var(--success)' }}>
+                                                <CheckCircle size={14} /> Mark as Paid
                                             </DropdownMenuItem>
                                         )}
 
-                                        <DropdownMenuSeparator className="bg-white/5 my-2" />
+                                        <DropdownMenuSeparator style={{ background: 'var(--border-subtle)' }} className="my-1" />
 
-                                        <DropdownMenuItem onClick={() => handleDownloadPDF(invoice._id)} className="rounded-xl focus:bg-indigo-600/10 gap-3 px-4 py-2.5 font-bold text-xs">
-                                            <Download size={16} /> Download PDF
+                                        <DropdownMenuItem onClick={() => handleDownloadPDF(invoice._id)} className="rounded-xl gap-2.5 px-3 py-2 text-xs font-semibold cursor-pointer" style={{ color: 'var(--text-primary)' }}>
+                                            <Download size={14} /> Download PDF
                                         </DropdownMenuItem>
 
                                         {invoice.status === 'draft' && (
-                                            <DropdownMenuItem onClick={() => handleDelete(invoice._id)} className="rounded-xl focus:bg-red-600/10 gap-3 px-4 py-2.5 font-bold text-xs text-red-500">
-                                                <Trash2 size={16} /> Delete Draft
+                                            <DropdownMenuItem onClick={() => handleDelete(invoice._id)} className="rounded-xl gap-2.5 px-3 py-2 text-xs font-semibold cursor-pointer" style={{ color: 'var(--destructive)' }}>
+                                                <Trash2 size={14} /> Delete Draft
                                             </DropdownMenuItem>
                                         )}
                                     </DropdownMenuContent>
@@ -222,6 +223,7 @@ export function InvoiceList({ projectId, refreshTrigger, onEdit, onRefresh, onCr
                     ))}
                 </TableBody>
             </Table>
+            </div>
         </GlassCard>
     );
 }

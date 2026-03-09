@@ -154,7 +154,7 @@ export function MilestoneTracker({ projectId, initialMilestones, onUpdate }: Mil
         <div className="space-y-8">
             <div className="flex items-center justify-between">
                 <div className="space-y-1">
-                    <h3 className="text-2xl font-black text-white tracking-tight">Project Roadmap</h3>
+                    <h3 className="text-2xl font-black tracking-tight">Project Roadmap</h3>
                     <p className="text-sm font-bold text-[var(--text-muted)]">Organize and track your project deliverables</p>
                 </div>
                 {isReordering && (
@@ -188,8 +188,8 @@ export function MilestoneTracker({ projectId, initialMilestones, onUpdate }: Mil
                     </SortableContext>
                 </DndContext>
 
-                <GlassCard className="p-4 bg-white/[0.02] border-dashed flex gap-4 items-center">
-                    <div className="h-12 w-12 flex items-center justify-center text-[var(--text-muted)] bg-white/5 rounded-2xl">
+                <GlassCard className="p-4 bg-[var(--surface-muted)] border-dashed flex gap-4 items-center">
+                    <div className="h-12 w-12 flex items-center justify-center text-[var(--text-muted)] rounded-2xl">
                         <Plus size={24} />
                     </div>
                     <GlassInput
@@ -254,13 +254,13 @@ function SortableItem({
             <GlassCard
                 className={cn(
                     "flex items-center gap-6 p-4 transition-all duration-300",
-                    isDragging ? "ring-2 ring-indigo-500 shadow-[0_0_40px_rgba(99,102,241,0.2)] bg-indigo-500/10" : "hover:border-white/10"
+                    isDragging ? "ring-2 ring-[var(--accent)] shadow-[var(--glow-sm)] bg-[var(--accent-light)]" : "hover:border-white/10"
                 )}
             >
                 <div
                     {...attributes}
                     {...listeners}
-                    className="cursor-grab active:cursor-grabbing text-[var(--text-muted)] hover:text-white transition-colors h-12 w-8 flex items-center justify-center bg-white/5 rounded-xl"
+                    className="cursor-grab active:cursor-grabbing text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors h-12 w-8 flex items-center justify-center bg-white/5 rounded-xl"
                 >
                     <GripVertical size={20} />
                 </div>
@@ -269,7 +269,7 @@ function SortableItem({
                     <input
                         defaultValue={milestone.title}
                         onBlur={(e) => e.target.value !== milestone.title && onUpdate(milestone._id, { title: e.target.value })}
-                        className="bg-transparent border-none focus:ring-0 font-bold text-base w-full outline-none text-white placeholder:text-[var(--text-muted)]"
+                        className="bg-transparent border-none focus:ring-0 font-bold text-base w-full outline-none text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
                         placeholder="Milestone title..."
                     />
                 </div>

@@ -31,7 +31,8 @@ export const GlassModal = ({ isOpen, onClose, title, children, maxWidth = 'sm:ma
                     animate={{ scale: 1, opacity: 1, y: 0 }}
                     exit={{ scale: 0.95, opacity: 0, y: 8 }}
                     transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-                    className="glass-card w-full border-white/5 p-8"
+                    className="glass-card w-full p-6 sm:p-8"
+                    style={{ borderColor: 'var(--border-medium)' }}
                 >
                     <DialogHeader className="mb-6">
                         <DialogTitle className="text-2xl font-black text-[var(--text-primary)]">

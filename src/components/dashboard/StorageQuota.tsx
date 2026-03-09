@@ -31,7 +31,7 @@ export function StorageQuota() {
     const percentage = Math.min((storageUsed / quota) * 100, 100);
 
     return (
-        <div className="glass-card p-4 space-y-3 border-white/5 bg-white/5">
+        <div className="glass-card p-4 space-y-3 border-[var(--border-subtle)] bg-[var(--surface-muted)]">
             <div className="flex items-center justify-between text-xs font-medium">
                 <div className="flex items-center gap-2 text-[var(--text-secondary)]">
                     <HardDrive size={14} />
@@ -42,7 +42,7 @@ export function StorageQuota() {
                 </span>
             </div>
 
-            <Progress value={percentage} className="h-1.5 bg-white/5" />
+            <Progress value={percentage} className="h-1.5 bg-[var(--surface-muted)]" />
 
             <div className="flex justify-between items-center text-[10px] text-[var(--text-muted)]">
                 <span>{bytes(storageUsed)} used</span>

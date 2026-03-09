@@ -75,21 +75,21 @@ export function PortalClient({ token, project }: { token: string; project: Proje
         <PortalOverview project={data.project} />
 
         <Tabs defaultValue="approvals" className="space-y-8">
-          <TabsList className="mx-auto flex h-14 w-fit overflow-x-auto rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface)] p-1 shadow-[var(--shadow-soft)] md:mx-0">
-            <TabsTrigger value="approvals" className="h-full gap-2 rounded-xl px-8 data-[state=active]:bg-[var(--accent-light)] data-[state=active]:text-[var(--accent)]">
-              <CheckCircle2 size={18} />
-              Approvals
+          <TabsList className="flex h-12 w-full overflow-x-auto rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface)] p-1 shadow-[var(--shadow-soft)]">
+            <TabsTrigger value="approvals" className="flex-1 h-full gap-1.5 rounded-xl px-3 sm:px-8 text-xs sm:text-sm data-[state=active]:bg-[var(--accent-light)] data-[state=active]:text-[var(--accent)]">
+              <CheckCircle2 size={15} />
+              <span>Approvals</span>
               {data.approvals.filter((approval) => approval.status === 'pending').length > 0 && (
-                <span className="ml-1 h-2 w-2 rounded-full bg-amber-400" />
+                <span className="ml-0.5 h-2 w-2 rounded-full bg-amber-400 shrink-0" />
               )}
             </TabsTrigger>
-            <TabsTrigger value="files" className="h-full gap-2 rounded-xl px-8 data-[state=active]:bg-[var(--accent-light)] data-[state=active]:text-[var(--accent)]">
-              <Files size={18} />
-              Files
+            <TabsTrigger value="files" className="flex-1 h-full gap-1.5 rounded-xl px-3 sm:px-8 text-xs sm:text-sm data-[state=active]:bg-[var(--accent-light)] data-[state=active]:text-[var(--accent)]">
+              <Files size={15} />
+              <span>Files</span>
             </TabsTrigger>
-            <TabsTrigger value="invoices" className="h-full gap-2 rounded-xl px-8 data-[state=active]:bg-[var(--accent-light)] data-[state=active]:text-[var(--accent)]">
-              <FileText size={18} />
-              Invoices
+            <TabsTrigger value="invoices" className="flex-1 h-full gap-1.5 rounded-xl px-3 sm:px-8 text-xs sm:text-sm data-[state=active]:bg-[var(--accent-light)] data-[state=active]:text-[var(--accent)]">
+              <FileText size={15} />
+              <span>Invoices</span>
             </TabsTrigger>
           </TabsList>
 
