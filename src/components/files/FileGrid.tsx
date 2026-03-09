@@ -12,8 +12,7 @@ import {
     History,
     Eye,
     Search,
-    FolderOpen,
-    Loader2
+    FolderOpen
 } from 'lucide-react';
 import { format } from 'date-fns';
 import bytes from 'bytes';
@@ -25,6 +24,8 @@ import {
     DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
+import type { FileListResponse, FileRecord } from '@/lib/contracts';
 
 // Glass Components
 import { GlassCard } from '@/components/glass/GlassCard';
@@ -32,24 +33,14 @@ import { GlassBadge } from '@/components/glass/GlassBadge';
 import { GlassButton } from '@/components/glass/GlassButton';
 import { GlassInput } from '@/components/glass/GlassInput';
 
-interface FileDoc {
-    _id: string;
-    name: string;
-    mimeType: string;
-    size: number;
-    folder: string;
-    updatedAt: string;
-    versions?: any[];
-}
-
 interface FileGridProps {
     projectId: string;
     refreshTrigger: number;
-    onPreview?: (file: FileDoc) => void;
+    onPreview?: (file: FileRecord) => void;
 }
 
 export function FileGrid({ projectId, refreshTrigger, onPreview }: FileGridProps) {
-    const [files, setFiles] = useState<FileDoc[]>([]);
+    const [files, setFiles] = useState<FileRecord[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [selectedFolder, setSelectedFolder] = useState('All Files');
@@ -59,8 +50,8 @@ export function FileGrid({ projectId, refreshTrigger, onPreview }: FileGridProps
         try {
             const res = await fetch(`/api/projects/${projectId}/files?folder=${selectedFolder === 'All Files' ? '' : selectedFolder}`);
             if (!res.ok) throw new Error('Failed to fetch files');
-            const data = await res.json();
-            setFiles(data);
+            const data = (await res.json()) as FileListResponse;
+            setFiles(data.items);
         } catch (error) {
             toast.error('Could not load files');
         } finally {
@@ -95,9 +86,12 @@ export function FileGrid({ projectId, refreshTrigger, onPreview }: FileGridProps
         }
     };
 
-    const filteredFiles = files.filter(f =>
-        f.name.toLowerCase().includes(search.toLowerCase())
+    const filteredFiles = files.filter((file) =>
+        file.originalName.toLowerCase().includes(search.toLowerCase()) ||
+        file.name.toLowerCase().includes(search.toLowerCase())
     );
+
+    const folders = ['All Files', ...new Set(files.map((file) => file.folder || 'Root'))];
 
     const getFileIcon = (mimeType: string) => {
         if (mimeType.startsWith('image/')) return <ImageIcon className="text-blue-400" size={28} />;
@@ -118,7 +112,7 @@ export function FileGrid({ projectId, refreshTrigger, onPreview }: FileGridProps
                     />
                 </div>
                 <div className="flex items-center gap-3 overflow-x-auto pb-1 w-full md:w-auto bg-white/5 p-1 rounded-2xl border border-white/5">
-                    {['All Files', 'Root', 'Design', 'Documents', 'Final'].map((folder) => (
+                    {folders.map((folder) => (
                         <button
                             key={folder}
                             onClick={() => setSelectedFolder(folder)}
@@ -163,7 +157,7 @@ export function FileGrid({ projectId, refreshTrigger, onPreview }: FileGridProps
                                             <GlassButton variant="ghost" size="icon" className="h-10 w-10 hover:bg-white/10 rounded-xl transition-all">
                                                 <MoreVertical size={18} />
                                             </GlassButton>
-                                        </DropdownMenuTrigger>
+                                    </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end" className="glass-card border-white/10 p-2 min-w-[180px] shadow-2xl backdrop-blur-3xl">
                                             <DropdownMenuItem onClick={() => onPreview?.(file)} className="rounded-xl focus:bg-indigo-600/10 gap-3 px-4 py-2.5 font-bold text-xs">
                                                 <Eye size={16} className="text-indigo-400" /> Quick Look
@@ -183,8 +177,8 @@ export function FileGrid({ projectId, refreshTrigger, onPreview }: FileGridProps
                                 </div>
 
                                 <div className="space-y-2">
-                                    <p className="text-base font-black truncate text-white tracking-tight" title={file.name}>
-                                        {file.name}
+                                    <p className="text-base font-black truncate text-white tracking-tight" title={file.originalName}>
+                                        {file.originalName}
                                     </p>
                                     <div className="flex items-center gap-3">
                                         <span className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">{bytes(file.size)}</span>

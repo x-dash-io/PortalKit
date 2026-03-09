@@ -3,6 +3,10 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import connectDB from '@/lib/mongodb';
 import Project from '@/lib/models/Project';
+import { serializeMilestone } from '@/lib/serializers';
+
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
@@ -24,7 +28,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
         if (!project) return NextResponse.json({ message: 'Project not found' }, { status: 404 });
 
-        return NextResponse.json(project.milestones);
+        return NextResponse.json(
+            project.milestones.map((milestone) => serializeMilestone(milestone as unknown as Record<string, unknown>))
+        );
     } catch (error) {
         return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
     }

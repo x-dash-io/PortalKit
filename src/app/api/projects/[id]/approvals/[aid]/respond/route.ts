@@ -1,6 +1,4 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
 import connectDB from '@/lib/mongodb';
 import Approval from '@/lib/models/Approval';
 import Notification from '@/lib/models/Notification';
@@ -8,6 +6,12 @@ import Project from '@/lib/models/Project';
 import { sendEmail } from '@/lib/email';
 import { ApprovalRespondedEmail } from '@/emails/approval-responded';
 import User from '@/lib/models/User';
+import { approvalResponseSchema } from '@/lib/validation';
+import { serializeApprovalRecord } from '@/lib/serializers';
+import * as z from 'zod';
+
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function POST(
     req: Request,
@@ -16,14 +20,10 @@ export async function POST(
     try {
         const { id: projectId, aid: approvalId } = await params;
         const body = await req.json();
-        const { status, comment } = body;
-
-        if (!['approved', 'changes_requested'].includes(status)) {
-            return NextResponse.json({ message: 'Invalid status' }, { status: 400 });
-        }
+        const { status, comment } = approvalResponseSchema.parse(body);
 
         await connectDB();
-        const approval = await Approval.findById(approvalId);
+        const approval = await Approval.findById(approvalId).populate('fileId', 'name originalName mimeType size');
         if (!approval) return NextResponse.json({ message: 'Approval not found' }, { status: 404 });
 
         const project = await Project.findById(projectId).lean();
@@ -35,14 +35,14 @@ export async function POST(
                 author: 'client',
                 text: comment,
                 createdAt: new Date(),
-            } as any);
+            });
         }
         await approval.save();
 
         // Create Notification for Freelancer
         await Notification.create({
             freelancerId: approval.freelancerId,
-            type: 'approval_response',
+            type: 'APPROVAL_RESPONDED',
             projectId,
             metadata: {
                 approvalId: approval._id,
@@ -71,11 +71,11 @@ export async function POST(
             console.error('Email error:', e);
         }
 
-        const sanitized = approval.toObject();
-        delete (sanitized as any).__v;
-
-        return NextResponse.json(sanitized);
-    } catch (error) {
+        return NextResponse.json(serializeApprovalRecord(approval.toObject()));
+    } catch (error: unknown) {
+        if (error instanceof z.ZodError) {
+            return NextResponse.json({ message: error.issues[0]?.message ?? 'Invalid response' }, { status: 400 });
+        }
         return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
     }
 }

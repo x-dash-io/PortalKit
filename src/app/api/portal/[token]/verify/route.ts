@@ -3,6 +3,9 @@ import { cookies } from 'next/headers';
 import connectDB from '@/lib/mongodb';
 import { validatePortalToken, createPortalSession } from '@/lib/portalAuth';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 export async function POST(
     req: Request,
     { params }: { params: Promise<{ token: string }> }

@@ -3,6 +3,10 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import connectDB from '@/lib/mongodb';
 import Invoice from '@/lib/models/Invoice';
+import Notification from '@/lib/models/Notification';
+
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function POST(
     req: Request,
@@ -25,6 +29,16 @@ export async function POST(
         invoice.status = 'paid';
         invoice.paidAt = new Date();
         await invoice.save();
+
+        await Notification.create({
+            freelancerId: session.user.id,
+            type: 'INVOICE_PAID',
+            projectId,
+            metadata: {
+                invoiceId: invoice._id.toString(),
+                invoiceNumber: invoice.invoiceNumber,
+            },
+        });
 
         return NextResponse.json({ message: 'Invoice marked as paid' });
     } catch (error) {

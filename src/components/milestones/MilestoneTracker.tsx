@@ -212,7 +212,15 @@ export function MilestoneTracker({ projectId, initialMilestones, onUpdate }: Mil
     );
 }
 
-function SortableItem({ milestone, onUpdate, onDelete }: any) {
+function SortableItem({
+    milestone,
+    onUpdate,
+    onDelete,
+}: {
+    milestone: Milestone;
+    onUpdate: (id: string, updates: Partial<Milestone>) => void;
+    onDelete: (id: string) => void;
+}) {
     const {
         attributes,
         listeners,
@@ -269,7 +277,7 @@ function SortableItem({ milestone, onUpdate, onDelete }: any) {
                 <div className="flex items-center gap-4">
                     <Select
                         defaultValue={milestone.status}
-                        onValueChange={(val: any) => onUpdate(milestone._id, { status: val })}
+                        onValueChange={(val) => onUpdate(milestone._id, { status: val as Milestone['status'] })}
                     >
                         <SelectTrigger className="h-10 border-none bg-white/5 hover:bg-white/10 px-4 rounded-xl min-w-[140px] font-bold text-xs ring-0 focus:ring-0">
                             <SelectValue />

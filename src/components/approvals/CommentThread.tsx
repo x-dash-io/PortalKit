@@ -2,31 +2,24 @@
 
 import React, { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
-import { Send, User, Trash2, Loader2, Smile } from 'lucide-react';
+import { Send, Loader2, Smile } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import type { ApprovalCommentRecord } from '@/lib/contracts';
 
-// Glass Components
-import { GlassCard } from '@/components/glass/GlassCard';
 import { GlassBadge } from '@/components/glass/GlassBadge';
 import { GlassButton } from '@/components/glass/GlassButton';
-
-interface Comment {
-    _id: string;
-    author: 'freelancer' | 'client';
-    text: string;
-    createdAt: string;
-}
 
 interface CommentThreadProps {
     approvalId: string;
     projectId: string;
-    initialComments: Comment[];
+    initialComments: ApprovalCommentRecord[];
     currentUserType: 'freelancer' | 'client';
+    portalToken?: string;
 }
 
-export function CommentThread({ approvalId, projectId, initialComments, currentUserType }: CommentThreadProps) {
-    const [comments, setComments] = useState<Comment[]>(initialComments);
+export function CommentThread({ approvalId, projectId, initialComments, currentUserType, portalToken }: CommentThreadProps) {
+    const [comments, setComments] = useState<ApprovalCommentRecord[]>(initialComments);
     const [newComment, setNewComment] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -36,10 +29,15 @@ export function CommentThread({ approvalId, projectId, initialComments, currentU
 
         setIsSubmitting(true);
         try {
-            const res = await fetch(`/api/projects/${projectId}/approvals/${approvalId}/comment`, {
+            const endpoint =
+                currentUserType === 'client' && portalToken
+                    ? `/api/portal/${portalToken}/approvals/${approvalId}/comment`
+                    : `/api/projects/${projectId}/approvals/${approvalId}/comment`;
+
+            const res = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: newComment, author: currentUserType }),
+                body: JSON.stringify({ text: newComment }),
             });
 
             if (!res.ok) throw new Error('Failed to post comment');
@@ -73,7 +71,7 @@ export function CommentThread({ approvalId, projectId, initialComments, currentU
                 ) : (
                     comments.map((comment) => (
                         <div
-                            key={comment._id}
+                            key={comment._id ?? `${comment.author}-${comment.createdAt}`}
                             className={cn(
                                 "flex flex-col gap-2 max-w-[90%] transition-all duration-500",
                                 comment.author === currentUserType ? "ml-auto items-end" : "items-start"

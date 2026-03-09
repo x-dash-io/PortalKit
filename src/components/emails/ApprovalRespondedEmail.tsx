@@ -52,7 +52,7 @@ export const ApprovalRespondedEmail = ({
                     {comment && (
                         <Section style={commentBox}>
                             <Text style={commentLabel}>Client Comment:</Text>
-                            <Text style={commentText}>"{comment}"</Text>
+                            <Text style={commentText}>&quot;{comment}&quot;</Text>
                         </Section>
                     )}
                     <Section style={btnContainer}>

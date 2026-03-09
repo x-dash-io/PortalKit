@@ -30,32 +30,23 @@ import {
     DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
-import { cn } from '@/lib/utils';
+import type { InvoiceRecord } from '@/lib/contracts';
 
 // Glass Components
 import { GlassCard } from '@/components/glass/GlassCard';
 import { GlassBadge } from '@/components/glass/GlassBadge';
 import { GlassButton } from '@/components/glass/GlassButton';
 
-interface Invoice {
-    _id: string;
-    invoiceNumber: string;
-    total: number;
-    currency: string;
-    status: 'draft' | 'sent' | 'viewed' | 'paid' | 'overdue';
-    dueDate: string;
-    sentAt?: string;
-}
-
 interface InvoiceListProps {
     projectId: string;
     refreshTrigger: number;
-    onEdit: (invoice: Invoice) => void;
+    onEdit: (invoice: InvoiceRecord) => void;
     onRefresh: () => void;
+    onCreate?: () => void;
 }
 
-export function InvoiceList({ projectId, refreshTrigger, onEdit, onRefresh }: InvoiceListProps) {
-    const [invoices, setInvoices] = useState<Invoice[]>([]);
+export function InvoiceList({ projectId, refreshTrigger, onEdit, onRefresh, onCreate }: InvoiceListProps) {
+    const [invoices, setInvoices] = useState<InvoiceRecord[]>([]);
     const [loading, setLoading] = useState(true);
 
     const fetchInvoices = async () => {
@@ -118,7 +109,7 @@ export function InvoiceList({ projectId, refreshTrigger, onEdit, onRefresh }: In
         window.open(`/api/projects/${projectId}/invoices/${invoiceId}/pdf`, '_blank');
     };
 
-    const getStatusBadge = (invoice: Invoice) => {
+    const getStatusBadge = (invoice: InvoiceRecord) => {
         const isOverdue = (invoice.status === 'sent' || invoice.status === 'viewed') &&
             isBefore(new Date(invoice.dueDate), startOfDay(new Date()));
 
@@ -149,6 +140,11 @@ export function InvoiceList({ projectId, refreshTrigger, onEdit, onRefresh }: In
                 </div>
                 <h4 className="text-white font-bold mb-1">No invoices found</h4>
                 <p className="text-[var(--text-muted)] text-sm">Create your first invoice to start getting paid.</p>
+                {onCreate && (
+                    <div className="mt-6">
+                        <GlassButton onClick={onCreate}>Create Invoice</GlassButton>
+                    </div>
+                )}
             </div>
         );
     }

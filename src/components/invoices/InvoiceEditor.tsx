@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -8,10 +8,8 @@ import {
     Plus,
     Trash2,
     Save,
-    Send,
     Calculator,
     Calendar as CalendarIcon,
-    ChevronRight
 } from 'lucide-react';
 import { format } from 'date-fns';
 import currency from 'currency.js';
@@ -34,6 +32,7 @@ import {
 } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import type { InvoiceRecord, ProjectDetail } from '@/lib/contracts';
 
 const itemSchema = z.object({
     description: z.string().min(1, 'Description is required'),
@@ -55,8 +54,8 @@ type InvoiceFormValues = z.infer<typeof invoiceSchema>;
 
 interface InvoiceEditorProps {
     projectId: string;
-    project: any;
-    initialData?: any;
+    project: ProjectDetail;
+    initialData?: InvoiceRecord;
     onSuccess: () => void;
     onCancel: () => void;
 }
@@ -90,7 +89,6 @@ export function InvoiceEditor({ projectId, project, initialData, onSuccess, onCa
         control,
         handleSubmit,
         watch,
-        setValue,
         formState: { errors, isSubmitting }
     } = useForm<InvoiceFormValues>({
         resolver: zodResolver(invoiceSchema),
@@ -136,7 +134,7 @@ export function InvoiceEditor({ projectId, project, initialData, onSuccess, onCa
 
             toast.success(initialData ? 'Invoice updated' : 'Invoice created');
             onSuccess();
-        } catch (error) {
+        } catch {
             toast.error('Error saving invoice');
         }
     };

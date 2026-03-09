@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Invoice from '@/lib/models/Invoice';
-import User from '@/lib/models/User';
 import Project from '@/lib/models/Project';
 import Notification from '@/lib/models/Notification';
 import { sendEmail } from '@/lib/email';
 import { OverdueReminderEmail } from '@/emails/overdue-reminder';
 import { differenceInDays, startOfDay } from 'date-fns';
+import type { IUser } from '@/lib/models/User';
+
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function GET(req: NextRequest) {
     const authHeader = req.headers.get('x-cron-secret');
@@ -29,13 +32,10 @@ export async function GET(req: NextRequest) {
         let notifiedCount = 0;
 
         for (const invoice of overdueInvoices) {
-            const freelancer = invoice.freelancerId as any;
+            const freelancer = invoice.freelancerId as unknown as IUser | null;
             if (!freelancer) continue;
 
             const daysOverdue = differenceInDays(today, new Date(invoice.dueDate));
-            const portalUrl = `${process.env.NEXT_PUBLIC_APP_URL}/portal/${(invoice as any).portalToken || 'invalid'}`;
-            // Wait, I need project portalToken. Let me find project.
-
             const project = await Project.findById(invoice.projectId);
             if (!project) continue;
 

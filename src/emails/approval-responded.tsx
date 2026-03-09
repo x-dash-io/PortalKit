@@ -44,7 +44,7 @@ export const ApprovalRespondedEmail = ({
                     {comment && (
                         <>
                             <Text style={label}>Comment</Text>
-                            <Text style={commentText}>"{comment}"</Text>
+                            <Text style={commentText}>&quot;{comment}&quot;</Text>
                         </>
                     )}
                 </Section>

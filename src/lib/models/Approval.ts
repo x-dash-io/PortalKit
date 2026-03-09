@@ -1,7 +1,8 @@
 import mongoose, { Schema, Document, Model, Types } from 'mongoose';
+import { APPROVAL_STATUSES, APPROVAL_TYPES } from '@/lib/contracts';
 
 export interface IComment {
-    _id: Types.ObjectId;
+    _id?: Types.ObjectId;
     author: 'freelancer' | 'client';
     text: string;
     createdAt: Date;
@@ -32,9 +33,9 @@ const ApprovalSchema = new Schema<IApproval>(
         freelancerId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
         title: { type: String, required: true },
         description: { type: String },
-        type: { type: String, enum: ['file', 'milestone', 'design', 'copy', 'other'], required: true },
+        type: { type: String, enum: APPROVAL_TYPES, required: true },
         fileId: { type: Schema.Types.ObjectId, ref: 'File' },
-        status: { type: String, enum: ['pending', 'approved', 'changes_requested'], default: 'pending' },
+        status: { type: String, enum: APPROVAL_STATUSES, default: 'pending' },
         comments: [CommentSchema],
     },
     { timestamps: true }

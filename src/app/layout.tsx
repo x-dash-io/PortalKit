@@ -2,17 +2,26 @@ import SessionProviders from '@/components/Providers';
 import ThemeProvider from '@/components/themes/ThemeProvider';
 import { Toaster } from '@/components/ui/sonner';
 import './globals.css';
-import { Inter } from 'next/font/google';
+import localFont from 'next/font/local';
 import { PageTransition } from '@/components/layout/PageTransition';
 
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
+const manrope = localFont({
+  src: './fonts/Manrope-Variable.ttf',
+  variable: '--font-manrope',
+  weight: '200 800',
+  display: 'swap',
+});
+
+const ibmPlexMono = localFont({
+  src: './fonts/IBMPlexMono-Regular.ttf',
+  variable: '--font-ibm-plex-mono',
+  weight: '400',
+  display: 'swap',
 });
 
 export const metadata = {
-  title: 'PortalKit - Freelancer Client Portal',
-  description: 'Manage projects, files, and invoices in one beautiful place.',
+  title: 'PortalKit',
+  description: 'Client portal infrastructure for modern freelance and studio operations.',
 };
 
 export default function RootLayout({
@@ -22,7 +31,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} font-sans antialiased`}>
+      <body className={`${manrope.variable} ${ibmPlexMono.variable} font-sans antialiased`}>
         <SessionProviders>
           <ThemeProvider>
             <PageTransition>

@@ -33,8 +33,8 @@ export function VerificationForm({ token }: VerificationFormProps) {
 
             toast.success('Access granted');
             window.location.href = `/portal/${token}`;
-        } catch (error: any) {
-            toast.error(error.message);
+        } catch (error: unknown) {
+            toast.error(error instanceof Error ? error.message : 'Verification failed');
         } finally {
             setLoading(false);
         }
@@ -77,7 +77,7 @@ export function VerificationForm({ token }: VerificationFormProps) {
             </form>
 
             <p className="text-center text-xs text-[var(--text-muted)]">
-                This link is private. If you're having trouble, please contact your freelancer.
+                This link is private. If you&apos;re having trouble, please contact your freelancer.
             </p>
         </div>
     );

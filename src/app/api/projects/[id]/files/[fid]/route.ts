@@ -7,6 +7,9 @@ import File from '@/lib/models/File';
 import User from '@/lib/models/User';
 import { deleteObject } from '@/lib/r2';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 export async function DELETE(
     req: Request,
     { params }: { params: Promise<{ id: string; fid: string }> }

@@ -3,10 +3,12 @@
 import React, { useState } from 'react';
 import { FileGrid } from './FileGrid';
 import { FileUploader } from './FileUploader';
+import { FilePreview } from './FilePreview';
 import { GlassCard } from '@/components/glass/GlassCard';
-import { GlassButton } from '@/components/glass/GlassButton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LayoutGrid, UploadCloud } from 'lucide-react';
+import { toast } from 'sonner';
+import type { FileRecord } from '@/lib/contracts';
 
 interface FileWorkspaceProps {
     projectId: string;
@@ -14,6 +16,7 @@ interface FileWorkspaceProps {
 
 export function FileWorkspace({ projectId }: FileWorkspaceProps) {
     const [refreshKey, setRefreshKey] = useState(0);
+    const [selectedFile, setSelectedFile] = useState<FileRecord | null>(null);
 
     const handleUploadComplete = () => {
         setRefreshKey(prev => prev + 1);
@@ -41,7 +44,11 @@ export function FileWorkspace({ projectId }: FileWorkspaceProps) {
                 </TabsList>
 
                 <TabsContent value="grid" className="focus-visible:outline-none">
-                    <FileGrid projectId={projectId} key={refreshKey} />
+                    <FileGrid
+                        projectId={projectId}
+                        refreshTrigger={refreshKey}
+                        onPreview={(file) => setSelectedFile(file)}
+                    />
                 </TabsContent>
 
                 <TabsContent value="upload" className="focus-visible:outline-none">
@@ -58,6 +65,16 @@ export function FileWorkspace({ projectId }: FileWorkspaceProps) {
                     </GlassCard>
                 </TabsContent>
             </Tabs>
+
+            <FilePreview
+                file={selectedFile}
+                projectId={projectId}
+                onClose={() => setSelectedFile(null)}
+                onVersionUploaded={() => {
+                    handleUploadComplete();
+                    setSelectedFile(null);
+                }}
+            />
         </div>
     );
 }

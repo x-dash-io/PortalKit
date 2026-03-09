@@ -1,7 +1,8 @@
 import mongoose, { Schema, Document, Model, Types } from 'mongoose';
+import { MILESTONE_STATUSES, PROJECT_STATUSES } from '@/lib/contracts';
 
 export interface IMilestone {
-    _id: Types.ObjectId;
+    _id?: Types.ObjectId;
     title: string;
     status: 'not_started' | 'in_progress' | 'in_review' | 'complete';
     dueDate?: Date;
@@ -28,7 +29,7 @@ const MilestoneSchema = new Schema<IMilestone>({
     title: { type: String, required: true },
     status: {
         type: String,
-        enum: ['not_started', 'in_progress', 'in_review', 'complete'],
+        enum: MILESTONE_STATUSES,
         default: 'not_started',
     },
     dueDate: { type: Date },
@@ -42,7 +43,7 @@ const ProjectSchema = new Schema<IProject>(
         clientEmail: { type: String, required: true },
         title: { type: String, required: true },
         description: { type: String },
-        status: { type: String, enum: ['active', 'completed', 'archived'], default: 'active' },
+        status: { type: String, enum: PROJECT_STATUSES, default: 'active' },
         portalTokenHash: { type: String, required: true },
         portalTokenPrefix: { type: String, required: true },
         portalEnabled: { type: Boolean, default: true },

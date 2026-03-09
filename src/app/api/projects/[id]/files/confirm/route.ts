@@ -5,6 +5,10 @@ import connectDB from '@/lib/mongodb';
 import Project from '@/lib/models/Project';
 import File from '@/lib/models/File';
 import User from '@/lib/models/User';
+import { serializeFileRecord } from '@/lib/serializers';
+
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function POST(
     req: Request,
@@ -37,7 +41,7 @@ export async function POST(
             $inc: { storageUsed: file.size }
         });
 
-        return NextResponse.json({ success: true, file });
+        return NextResponse.json({ success: true, file: serializeFileRecord(file.toObject()) });
     } catch (error) {
         console.error('Confirm error:', error);
         return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });

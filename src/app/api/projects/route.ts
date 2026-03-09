@@ -3,9 +3,14 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import connectDB from '@/lib/mongodb';
 import Project from '@/lib/models/Project';
+import { getProjectCounts } from '@/lib/projectCounts';
+import { serializeProjectDetail, serializeProjectSummary } from '@/lib/serializers';
 import * as z from 'zod';
 import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
+
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 import { projectSchema } from '@/lib/validation';
 
@@ -20,7 +25,17 @@ export async function GET() {
             .sort({ updatedAt: -1 })
             .lean();
 
-        return NextResponse.json(projects);
+        const counts = await getProjectCounts(projects.map((project) => String(project._id)));
+
+        return NextResponse.json(
+            projects.map((project) =>
+                serializeProjectSummary(project, {
+                    approvals: counts.approvals[String(project._id)] ?? 0,
+                    files: counts.files[String(project._id)] ?? 0,
+                    invoices: counts.invoices[String(project._id)] ?? 0,
+                })
+            )
+        );
     } catch (error) {
         return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
     }
@@ -47,13 +62,10 @@ export async function POST(req: Request) {
             portalTokenHash: tokenHash,
             portalTokenPrefix: tokenPrefix,
             status: 'active',
-        })).toObject() as any;
+        })).toObject();
 
-        delete project.portalTokenHash;
-        delete project.__v;
-
-        return NextResponse.json({ project, token }, { status: 201 });
-    } catch (error: any) {
+        return NextResponse.json({ project: serializeProjectDetail(project), token }, { status: 201 });
+    } catch (error: unknown) {
         if (error instanceof z.ZodError) {
             return NextResponse.json({ message: error.issues[0].message }, { status: 400 });
         }

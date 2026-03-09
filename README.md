@@ -1,36 +1,99 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PortalKit
 
-## Getting Started
+PortalKit is a Next.js client-operations workspace for freelancers and small studios. It combines project tracking, file delivery, approvals, invoices, notifications, and a client-facing portal in one product surface.
 
-First, run the development server:
+## Product surfaces
+
+- Public marketing and auth flows
+- Freelancer dashboard with project index and workspace shell
+- Project detail workspace for milestones, files, approvals, and invoices
+- Client portal for secure review, download, and invoice access
+- Settings for notifications, profile, theme, and billing visibility
+
+## Stack
+
+- Next.js App Router
+- React 19
+- TypeScript
+- Tailwind CSS v4
+- NextAuth
+- MongoDB + Mongoose
+- Resend
+- Cloudflare R2 compatible object storage
+- Upstash Redis rate limiting
+
+## Local setup
+
+1. Install dependencies.
+   ```bash
+   npm install
+   ```
+2. Create a local environment file.
+   ```bash
+   cp .env.example .env.local
+   ```
+3. Fill in the required environment variables in `.env.local`.
+4. Start the dev server.
+   ```bash
+   npm run dev
+   ```
+
+Open `http://localhost:3000`.
+
+## Environment variables
+
+PortalKit expects the variables listed in [.env.example](/home/singason/Desktop/PortalKit/.env.example).
+
+Required for core app startup:
+
+- `MONGODB_URI`
+- `NEXTAUTH_URL`
+- `NEXTAUTH_SECRET`
+- `NEXT_PUBLIC_APP_URL`
+
+Required for storage and uploads:
+
+- `R2_ACCOUNT_ID`
+- `R2_ACCESS_KEY_ID`
+- `R2_SECRET_ACCESS_KEY`
+- `R2_BUCKET_NAME`
+
+Optional integrations:
+
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_CLIENT_SECRET`
+- `RESEND_API_KEY`
+- `FROM_EMAIL`
+- `UPSTASH_REDIS_REST_URL`
+- `UPSTASH_REDIS_REST_TOKEN`
+- `CRON_SECRET`
+
+## Scripts
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run lint
+npx tsc --noEmit
+npm test
+npm run build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## What changed in this upgrade
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Added shared typed contracts and serializer boundaries across app and API layers.
+- Normalized project, milestone, invoice, theme, and notification enums.
+- Fixed portal/server-client separation and repaired broken project, file, approval, invoice, and settings flows.
+- Added a real projects index plus real profile and billing settings pages.
+- Reworked the global visual system with local fonts, semantic design tokens, motion, and themed toasts.
+- Added contract and portal-session tests using Node's built-in test runner.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Verification checklist
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Signup and login
+- Dashboard load and project creation
+- Project detail load and project editing
+- File upload, preview, download, and versioning
+- Approval request and response
+- Invoice draft, send, view, and mark-paid flow
+- Settings and theme persistence
+- Portal view across desktop and mobile

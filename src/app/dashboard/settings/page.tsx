@@ -1,176 +1,130 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { motion } from 'framer-motion';
-import {
-    Bell,
-    Mail,
-    Shield,
-    User as UserIcon,
-    Save,
-    CheckCircle2,
-    Eye,
-    FileText,
-    Clock
-} from 'lucide-react';
-import { GlassCard } from '@/components/glass/GlassCard';
-import { GlassButton } from '@/components/glass/GlassButton';
-import { Switch } from '@/components/ui/switch';
+import { CheckCircle2, Clock, Eye, FileText, Mail, Save } from 'lucide-react';
 import { toast } from 'sonner';
+import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
+import { GlassCard } from '@/components/glass/GlassCard';
+import { DEFAULT_EMAIL_PREFERENCES, type EmailPreferences } from '@/lib/contracts';
 
-export default function SettingsPage() {
-    const { data: session, update } = useSession();
-    const [loading, setLoading] = useState(false);
-    const [preferences, setPreferences] = useState({
-        invoiceViewed: true,
-        approvalResponded: true,
-        portalVisited: false,
-        overdueReminders: true,
-    });
+export default function SettingsNotificationsPage() {
+  const { data: session, update } = useSession();
+  const [loading, setLoading] = useState(false);
+  const [preferences, setPreferences] = useState<EmailPreferences>(DEFAULT_EMAIL_PREFERENCES);
 
-    useEffect(() => {
-        if ((session?.user as any)?.emailPreferences) {
-            setPreferences((session.user as any).emailPreferences);
-        }
-    }, [session]);
+  useEffect(() => {
+    if (session?.user?.emailPreferences) {
+      setPreferences(session.user.emailPreferences);
+    }
+  }, [session]);
 
-    const handleToggle = (key: string) => {
-        setPreferences(prev => ({
-            ...prev,
-            [key]: !prev[key as keyof typeof prev]
-        }));
-    };
+  const handleSave = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/user/settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ emailPreferences: preferences }),
+      });
 
-    const handleSave = async () => {
-        setLoading(true);
-        try {
-            const res = await fetch('/api/user/settings', {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ emailPreferences: preferences }),
-            });
+      if (!res.ok) throw new Error('Failed to save preferences');
 
-            if (!res.ok) throw new Error('Failed to save settings');
+      await update({
+        user: {
+          emailPreferences: preferences,
+        },
+      });
 
-            toast.success('Preferences saved successfully');
-            // Update session to reflect changes locally if needed
-            await update({
-                ...session,
-                user: {
-                    ...session?.user,
-                    emailPreferences: preferences
-                }
-            });
-        } catch (error) {
-            toast.error('Error saving preferences');
-        } finally {
-            setLoading(false);
-        }
-    };
+      toast.success('Notification preferences updated');
+    } catch {
+      toast.error('Could not save notification preferences');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    return (
-        <div className="max-w-4xl mx-auto space-y-10">
-            <header>
-                <h1 className="text-4xl font-black tracking-tight text-white mb-2">Settings</h1>
-                <p className="text-[var(--text-secondary)] font-medium">Manage your account and notification preferences.</p>
-            </header>
-
-            <div className="grid md:grid-cols-3 gap-8">
-                <aside className="space-y-2">
-                    <nav className="flex flex-col gap-1">
-                        {[
-                            { name: 'Notifications', icon: Bell, active: true },
-                            { name: 'Profile', icon: UserIcon, active: false },
-                            { name: 'Security', icon: Shield, active: false },
-                        ].map(item => (
-                            <button
-                                key={item.name}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all ${item.active
-                                        ? "bg-[var(--accent-light)] text-[var(--accent)]"
-                                        : "text-[var(--text-muted)] hover:text-white hover:bg-white/5"
-                                    }`}
-                            >
-                                <item.icon size={18} />
-                                {item.name}
-                            </button>
-                        ))}
-                    </nav>
-                </aside>
-
-                <div className="md:col-span-2 space-y-6">
-                    <GlassCard className="p-8">
-                        <div className="flex items-center gap-4 mb-8">
-                            <div className="h-12 w-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20 shadow-inner">
-                                <Mail className="text-indigo-400" size={24} />
-                            </div>
-                            <div>
-                                <h2 className="text-xl font-black text-white">Email Notifications</h2>
-                                <p className="text-xs text-[var(--text-muted)] font-bold uppercase tracking-widest mt-1">Control when we contact you</p>
-                            </div>
-                        </div>
-
-                        <div className="space-y-6">
-                            <PreferenceToggle
-                                icon={<FileText className="text-emerald-400" size={18} />}
-                                title="Invoice Viewed"
-                                description="Get notified when a client opens one of your invoices."
-                                checked={preferences.invoiceViewed}
-                                onCheckedChange={() => handleToggle('invoiceViewed')}
-                            />
-                            <PreferenceToggle
-                                icon={<CheckCircle2 className="text-purple-400" size={18} />}
-                                title="Approval Response"
-                                description="Receive an update when a client approves or requests changes."
-                                checked={preferences.approvalResponded}
-                                onCheckedChange={() => handleToggle('approvalResponded')}
-                            />
-                            <PreferenceToggle
-                                icon={<Eye className="text-blue-400" size={18} />}
-                                title="Portal Visits"
-                                description="Daily digest of unique portal views from your clients."
-                                checked={preferences.portalVisited}
-                                onCheckedChange={() => handleToggle('portalVisited')}
-                            />
-                            <PreferenceToggle
-                                icon={<Clock className="text-red-400" size={18} />}
-                                title="Overdue Reminders"
-                                description="Automatically send friendly reminders to clients for late payments."
-                                checked={preferences.overdueReminders}
-                                onCheckedChange={() => handleToggle('overdueReminders')}
-                            />
-                        </div>
-
-                        <div className="mt-10 pt-8 border-t border-white/5 flex justify-end">
-                            <GlassButton
-                                onClick={handleSave}
-                                loading={loading}
-                                theme="indigo"
-                                icon={<Save size={18} />}
-                            >
-                                Save Changes
-                            </GlassButton>
-                        </div>
-                    </GlassCard>
-                </div>
-            </div>
+  return (
+    <GlassCard className="rounded-[2rem] p-8" hoverable={false}>
+      <div className="flex flex-col gap-4 border-b border-[var(--border-subtle)] pb-6 md:flex-row md:items-center md:justify-between">
+        <div className="flex items-center gap-4">
+          <div className="flex h-14 w-14 items-center justify-center rounded-3xl bg-[var(--accent-light)] text-[var(--accent)]">
+            <Mail size={24} />
+          </div>
+          <div>
+            <h2 className="text-2xl font-semibold tracking-tight text-[var(--text-primary)]">Notification preferences</h2>
+            <p className="mt-1 text-sm text-[var(--text-secondary)]">Decide which client and billing events should reach you automatically.</p>
+          </div>
         </div>
-    );
+
+        <Button className="rounded-2xl px-5" disabled={loading} onClick={handleSave}>
+          <Save size={16} />
+          {loading ? 'Saving...' : 'Save changes'}
+        </Button>
+      </div>
+
+      <div className="mt-8 space-y-4">
+        <PreferenceToggle
+          icon={<FileText className="text-emerald-600" size={18} />}
+          title="Invoice viewed"
+          description="Notify me when a client opens an invoice."
+          checked={preferences.invoiceViewed}
+          onCheckedChange={() => setPreferences((current) => ({ ...current, invoiceViewed: !current.invoiceViewed }))}
+        />
+        <PreferenceToggle
+          icon={<CheckCircle2 className="text-blue-600" size={18} />}
+          title="Approval responded"
+          description="Notify me when a client approves work or requests changes."
+          checked={preferences.approvalResponded}
+          onCheckedChange={() =>
+            setPreferences((current) => ({ ...current, approvalResponded: !current.approvalResponded }))
+          }
+        />
+        <PreferenceToggle
+          icon={<Eye className="text-[var(--accent)]" size={18} />}
+          title="Portal visited"
+          description="Notify me when the client revisits the project portal."
+          checked={preferences.portalVisited}
+          onCheckedChange={() => setPreferences((current) => ({ ...current, portalVisited: !current.portalVisited }))}
+        />
+        <PreferenceToggle
+          icon={<Clock className="text-amber-600" size={18} />}
+          title="Overdue reminders"
+          description="Allow PortalKit to email clients about overdue invoices."
+          checked={preferences.overdueReminders}
+          onCheckedChange={() =>
+            setPreferences((current) => ({ ...current, overdueReminders: !current.overdueReminders }))
+          }
+        />
+      </div>
+    </GlassCard>
+  );
 }
 
-function PreferenceToggle({ icon, title, description, checked, onCheckedChange }: any) {
-    return (
-        <div className="flex items-center justify-between gap-6 p-4 rounded-2xl hover:bg-white/[0.02] transition-colors group">
-            <div className="flex gap-4">
-                <div className="h-10 w-10 rounded-xl bg-white/5 flex items-center justify-center shrink-0 border border-white/5 group-hover:border-indigo-500/20 transition-colors">
-                    {icon}
-                </div>
-                <div className="space-y-1">
-                    <p className="text-sm font-black text-white">{title}</p>
-                    <p className="text-xs text-[var(--text-muted)] font-medium leading-relaxed">{description}</p>
-                </div>
-            </div>
-            <Switch checked={checked} onCheckedChange={onCheckedChange} />
+function PreferenceToggle({
+  icon,
+  title,
+  description,
+  checked,
+  onCheckedChange,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  checked: boolean;
+  onCheckedChange: () => void;
+}) {
+  return (
+    <div className="flex flex-col gap-5 rounded-[1.75rem] border border-[var(--border-subtle)] bg-[var(--surface)] p-5 md:flex-row md:items-center md:justify-between">
+      <div className="flex gap-4">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[var(--muted)]">{icon}</div>
+        <div className="space-y-1">
+          <p className="font-medium text-[var(--text-primary)]">{title}</p>
+          <p className="text-sm leading-relaxed text-[var(--text-secondary)]">{description}</p>
         </div>
-    );
+      </div>
+      <Switch checked={checked} onCheckedChange={onCheckedChange} />
+    </div>
+  );
 }

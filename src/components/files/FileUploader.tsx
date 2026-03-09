@@ -2,14 +2,14 @@
 
 import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Upload, X, FileIcon, Loader2, CheckCircle2 } from 'lucide-react';
+import { Upload, X, FileIcon, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 // Glass Components
 import { GlassCard } from '@/components/glass/GlassCard';
 import { GlassBadge } from '@/components/glass/GlassBadge';
-import { Progress } from '@/components/ui/progress';
 
 interface FileUploaderProps {
     projectId: string;
@@ -98,10 +98,11 @@ export function FileUploader({ projectId, onComplete, folder = 'Root' }: FileUpl
             setTimeout(() => {
                 setUploadingFiles((prev) => prev.filter((f) => f.id !== uFile.id));
             }, 3000);
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error(error);
+            const message = error instanceof Error ? error.message : 'Upload failed';
             setUploadingFiles((prev) =>
-                prev.map((f) => (f.id === uFile.id ? { ...f, status: 'error', error: error.message } : f))
+                prev.map((f) => (f.id === uFile.id ? { ...f, status: 'error', error: message } : f))
             );
             toast.error(`Upload failed: ${uFile.file.name}`);
         }

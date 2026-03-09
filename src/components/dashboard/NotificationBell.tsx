@@ -8,11 +8,8 @@ import {
     CheckCircle2,
     Clock,
     Check,
-    MoreHorizontal,
-    ExternalLink,
     Settings
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { formatDistanceToNow } from 'date-fns';
 import { useRouter } from 'next/navigation';
@@ -22,29 +19,17 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuLabel,
-    DropdownMenuSeparator,
     DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { GlassButton } from '@/components/glass/GlassButton';
-
-interface Notification {
-    _id: string;
-    type: string;
-    projectId?: {
-        _id: string;
-        title: string;
-    };
-    read: boolean;
-    metadata?: Record<string, any>;
-    createdAt: string;
-}
+import type { NotificationRecord } from '@/lib/contracts';
+import { getNotificationMessage } from '@/lib/notifications';
 
 export function NotificationBell() {
     const [isOpen, setIsOpen] = useState(false);
     const queryClient = useQueryClient();
     const router = useRouter();
 
-    const { data: notifications = [] } = useQuery<Notification[]>({
+    const { data: notifications = [] } = useQuery<NotificationRecord[]>({
         queryKey: ['notifications'],
         queryFn: async () => {
             const res = await fetch('/api/notifications');
@@ -82,22 +67,9 @@ export function NotificationBell() {
         }
     };
 
-    const getMessage = (notification: Notification) => {
-        const projectTitle = notification.projectId?.title || 'a project';
-        switch (notification.type) {
-            case 'PORTAL_VISITED': return `Client visited ${projectTitle} portal`;
-            case 'INVOICE_SENT': return `Invoice sent for ${projectTitle}`;
-            case 'INVOICE_PAID': return `Invoice paid for ${projectTitle}`;
-            case 'APPROVAL_REQUESTED': return `New approval request in ${projectTitle}`;
-            case 'APPROVAL_RESPONDED': return `Client responded to approval in ${projectTitle}`;
-            case 'INVOICE_OVERDUE': return `Invoice for ${projectTitle} is overdue`;
-            default: return `New notification in ${projectTitle}`;
-        }
-    };
-
-    const handleNotificationClick = (notification: Notification) => {
-        if (notification.projectId?._id) {
-            router.push(`/dashboard/projects/${notification.projectId._id}`);
+    const handleNotificationClick = (notification: NotificationRecord) => {
+        if (notification.project?._id) {
+            router.push(`/dashboard/projects/${notification.project._id}`);
             setIsOpen(false);
         }
     };
@@ -141,7 +113,7 @@ export function NotificationBell() {
                             <div className="h-12 w-12 rounded-2xl bg-white/5 flex items-center justify-center mb-4">
                                 <Bell className="text-white/10" size={24} />
                             </div>
-                            <p className="text-sm font-black text-white/20 uppercase tracking-widest">Everything's quiet</p>
+                            <p className="text-sm font-black text-white/20 uppercase tracking-widest">Everything&apos;s quiet</p>
                         </div>
                     ) : (
                         notifications.map((n) => (
@@ -164,7 +136,7 @@ export function NotificationBell() {
                                         "text-xs leading-relaxed",
                                         !n.read ? "text-white font-bold" : "text-[var(--text-secondary)] font-medium"
                                     )}>
-                                        {getMessage(n)}
+                                        {getNotificationMessage(n.type, n.project?.title || 'a project')}
                                     </p>
                                     <div className="flex items-center justify-between">
                                         <p className="text-[10px] text-[var(--text-muted)] font-medium">

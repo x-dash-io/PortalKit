@@ -68,8 +68,8 @@ export function NewProjectModal({ onSuccess }: NewProjectModalProps) {
             form.reset();
             router.refresh();
             if (onSuccess) onSuccess();
-        } catch (error: any) {
-            toast.error(error.message);
+        } catch (error: unknown) {
+            toast.error(error instanceof Error ? error.message : 'Could not create project');
         } finally {
             setIsLoading(false);
         }
@@ -78,26 +78,25 @@ export function NewProjectModal({ onSuccess }: NewProjectModalProps) {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl gap-2 h-11 px-6 shadow-indigo-500/20 shadow-lg">
+                <Button className="h-11 gap-2 rounded-2xl px-6">
                     <Plus size={18} />
                     <span>New Project</span>
                 </Button>
             </DialogTrigger>
-            <DialogContent className="glass-card sm:max-w-[500px] border-white/10 backdrop-blur-2xl">
+            <DialogContent className="sm:max-w-[520px] rounded-[2rem] border-[var(--border-subtle)] bg-[var(--surface)] p-0 shadow-[var(--shadow-soft)]">
                 <DialogHeader>
-                    <DialogTitle className="text-2xl font-bold">Launch New Project</DialogTitle>
-                    <DialogDescription>
-                        Enter the details to create a new client portal.
+                    <DialogTitle className="text-2xl font-semibold tracking-tight">Launch new project</DialogTitle>
+                    <DialogDescription className="text-[var(--text-secondary)]">
+                        Create a workspace with files, approvals, invoices, and a dedicated client portal.
                     </DialogDescription>
                 </DialogHeader>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-6 pb-6">
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label htmlFor="clientName">Client Name</Label>
                             <Input
                                 id="clientName"
                                 placeholder="Acme Corp"
-                                className="glass-input"
                                 disabled={isLoading}
                                 {...form.register('clientName')}
                             />
@@ -111,7 +110,6 @@ export function NewProjectModal({ onSuccess }: NewProjectModalProps) {
                                 id="clientEmail"
                                 type="email"
                                 placeholder="client@example.com"
-                                className="glass-input"
                                 disabled={isLoading}
                                 {...form.register('clientEmail')}
                             />
@@ -125,7 +123,6 @@ export function NewProjectModal({ onSuccess }: NewProjectModalProps) {
                         <Input
                             id="title"
                             placeholder="E-commerce Redesign"
-                            className="glass-input"
                             disabled={isLoading}
                             {...form.register('title')}
                         />
@@ -138,7 +135,7 @@ export function NewProjectModal({ onSuccess }: NewProjectModalProps) {
                         <Textarea
                             id="description"
                             placeholder="Key project goals and context..."
-                            className="glass-input resize-none h-32"
+                            className="h-32 resize-none"
                             disabled={isLoading}
                             {...form.register('description')}
                         />
@@ -154,7 +151,6 @@ export function NewProjectModal({ onSuccess }: NewProjectModalProps) {
                         </Button>
                         <Button
                             type="submit"
-                            className="bg-indigo-600 hover:bg-indigo-700"
                             disabled={isLoading}
                         >
                             {isLoading ? 'Creating...' : 'Create Project'}

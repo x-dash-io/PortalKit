@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Model, Types } from 'mongoose';
+import { FILE_STATUSES } from '@/lib/contracts';
 
 export interface IFileVersion {
     r2Key: string;
@@ -19,6 +20,7 @@ export interface IFile extends Document {
     status: 'pending' | 'active';
     versions: IFileVersion[];
     createdAt: Date;
+    updatedAt: Date;
 }
 
 const FileSchema = new Schema<IFile>(
@@ -28,11 +30,11 @@ const FileSchema = new Schema<IFile>(
         name: { type: String, required: true },
         originalName: { type: String, required: true },
         r2Key: { type: String, required: true },
-        r2Bucket: { type: String, required: true },
+        r2Bucket: { type: String, required: true, default: process.env.R2_BUCKET_NAME || 'default' },
         mimeType: { type: String, required: true },
         size: { type: Number, required: true },
         folder: { type: String },
-        status: { type: String, enum: ['pending', 'active'], default: 'pending' },
+        status: { type: String, enum: FILE_STATUSES, default: 'pending' },
         versions: [
             {
                 r2Key: { type: String, required: true },
@@ -41,7 +43,7 @@ const FileSchema = new Schema<IFile>(
             },
         ],
     },
-    { timestamps: { createdAt: true, updatedAt: false } }
+    { timestamps: true }
 );
 
 FileSchema.index({ projectId: 1 });

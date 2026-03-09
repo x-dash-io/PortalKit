@@ -7,6 +7,10 @@ import File from '@/lib/models/File';
 import User from '@/lib/models/User';
 import { getPresignedUploadUrl, generateFileKey } from '@/lib/r2';
 import * as z from 'zod';
+import { serializeFileRecord } from '@/lib/serializers';
+
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const presignSchema = z.object({
     projectId: z.string(),
@@ -39,23 +43,27 @@ export async function POST(req: Request) {
 
         const fileKey = generateFileKey(projectId, filename);
         const uploadUrl = await getPresignedUploadUrl(fileKey, mimeType);
-
         const fileDoc = await File.create({
             projectId,
+            freelancerId: session.user.id,
             name: filename,
+            originalName: filename,
             mimeType,
             size,
             r2Key: fileKey,
+            r2Bucket: process.env.R2_BUCKET_NAME || 'default',
             folder: folder || 'Root',
             status: 'pending',
+            versions: [],
         });
 
         return NextResponse.json({
             uploadUrl,
             fileKey,
-            fileId: fileDoc._id,
+            fileId: String(fileDoc._id),
+            file: serializeFileRecord(fileDoc.toObject()),
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         if (error instanceof z.ZodError) {
             return NextResponse.json({ message: error.issues[0].message }, { status: 400 });
         }

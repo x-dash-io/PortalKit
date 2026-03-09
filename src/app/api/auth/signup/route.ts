@@ -3,6 +3,9 @@ import bcrypt from 'bcryptjs';
 import connectDB from '@/lib/mongodb';
 import User from '@/lib/models/User';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 export async function POST(req: Request) {
     try {
         const { name, email, password } = await req.json();
@@ -32,7 +35,7 @@ export async function POST(req: Request) {
             { message: 'User created successfully', userId: newUser._id },
             { status: 201 }
         );
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Signup error:', error);
         return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
     }

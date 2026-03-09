@@ -5,9 +5,14 @@ import connectDB from '@/lib/mongodb';
 import Project from '@/lib/models/Project';
 import Invoice from '@/lib/models/Invoice';
 import User from '@/lib/models/User';
+import { serializeInvoiceRecord } from '@/lib/serializers';
 import * as z from 'zod';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 import { invoiceSchema } from '@/lib/validation';
+import { calculateInvoiceTotals } from '@/lib/invoices';
 
 export async function GET(
     req: Request,
@@ -24,9 +29,9 @@ export async function GET(
 
         const invoices = await Invoice.find({ projectId })
             .select('-__v')
-            .sort({ createdAt: -1 })
+            .sort({ createdAt: -1, issueDate: -1 })
             .lean();
-        return NextResponse.json(invoices);
+        return NextResponse.json(invoices.map((invoice) => serializeInvoiceRecord(invoice)));
     } catch (error) {
         return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
     }
@@ -58,26 +63,24 @@ export async function POST(
         const invoiceNumber = `INV-${String(user!.lastInvoiceNumber).padStart(4, '0')}`;
 
         // Calculate totals server-side for safety
-        const subtotal = validated.lineItems.reduce((acc, item) => acc + (item.quantity * item.rate), 0);
-        const taxAmount = subtotal * (validated.taxRate / 100);
-        const total = subtotal + taxAmount - validated.discount;
+        const totals = calculateInvoiceTotals(validated.lineItems, validated.taxRate, validated.discount);
 
         const invoice = (await Invoice.create({
             ...validated,
+            issueDate: validated.issueDate,
             projectId,
             freelancerId: session.user.id,
             invoiceNumber,
             clientName: project.clientName,
             clientEmail: project.clientEmail,
-            subtotal,
-            total,
+            subtotal: totals.subtotal,
+            tax: totals.tax,
+            total: totals.total,
             status: 'draft',
-        })).toObject() as any;
+        })).toObject();
 
-        delete invoice.__v;
-
-        return NextResponse.json(invoice, { status: 201 });
-    } catch (error: any) {
+        return NextResponse.json(serializeInvoiceRecord(invoice), { status: 201 });
+    } catch (error: unknown) {
         if (error instanceof z.ZodError) {
             return NextResponse.json({ message: error.issues[0].message }, { status: 400 });
         }

@@ -2,11 +2,11 @@
 
 import React from 'react';
 import { ApprovalCard } from '@/components/approvals/ApprovalCard';
-import { CheckCircle2, AlertCircle, Clock } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { CheckCircle2 } from 'lucide-react';
+import type { ApprovalRecord } from '@/lib/contracts';
 
 interface PortalApprovalsProps {
-    approvals: any[];
+    approvals: ApprovalRecord[];
     token: string;
     projectId: string;
 }
@@ -33,13 +33,14 @@ export function PortalApprovals({ approvals, token, projectId }: PortalApprovals
                                 projectId={projectId}
                                 view="client"
                                 onRefresh={() => window.location.reload()}
+                                portalToken={token}
                             />
                         </div>
                     ))}
                     {pending.length === 0 && (
                         <div className="py-16 text-center glass-card border-dashed border-emerald-500/20 bg-emerald-500/5 rounded-3xl">
                             <CheckCircle2 size={32} className="mx-auto text-emerald-400 mb-4" />
-                            <p className="text-lg font-bold text-white">You're all caught up!</p>
+                            <p className="text-lg font-bold text-white">You&apos;re all caught up!</p>
                             <p className="text-sm text-[var(--text-muted)]">No pending approvals at this time.</p>
                         </div>
                     )}
@@ -60,6 +61,7 @@ export function PortalApprovals({ approvals, token, projectId }: PortalApprovals
                                 projectId={projectId}
                                 view="client"
                                 onRefresh={() => window.location.reload()}
+                                portalToken={token}
                             />
                         ))}
                     </div>

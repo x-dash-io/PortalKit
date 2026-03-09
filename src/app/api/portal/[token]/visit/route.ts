@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
-import Project from '@/lib/models/Project';
 import Notification from '@/lib/models/Notification';
 import User from '@/lib/models/User';
-import { sendEmail } from '@/lib/email';
 import { validatePortalToken } from '@/lib/portalAuth';
+
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function POST(
     req: Request,
@@ -21,7 +22,7 @@ export async function POST(
         // Debounce notifications: max 1 per 6 hours per project
         const lastNotification = await Notification.findOne({
             projectId: project._id,
-            type: 'portal_view',
+            type: 'PORTAL_VISITED',
             createdAt: { $gt: new Date(Date.now() - 6 * 60 * 60 * 1000) }
         });
 
@@ -38,8 +39,7 @@ export async function POST(
             // Send email if preferred
             const freelancer = await User.findById(project.freelancerId);
             if (freelancer && freelancer.emailPreferences?.portalVisited) {
-                // No specific template defined for portal visit in Task Step 2.
-                // Skipping email for now to avoid lint errors.
+                // Portal visit emails are intentionally skipped until a dedicated template exists.
             }
         }
 

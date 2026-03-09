@@ -5,6 +5,12 @@ import connectDB from '@/lib/mongodb';
 import Project from '@/lib/models/Project';
 import Invoice from '@/lib/models/Invoice';
 import { invoiceSchema } from '@/lib/validation';
+import { serializeInvoiceRecord } from '@/lib/serializers';
+import * as z from 'zod';
+import { calculateInvoiceTotals } from '@/lib/invoices';
+
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function GET(
     req: Request,
@@ -24,7 +30,7 @@ export async function GET(
 
         if (!invoice) return NextResponse.json({ message: 'Invoice not found' }, { status: 404 });
 
-        return NextResponse.json(invoice);
+        return NextResponse.json(serializeInvoiceRecord(invoice));
     } catch (error) {
         return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
     }
@@ -54,24 +60,25 @@ export async function PATCH(
             return NextResponse.json({ message: 'Only drafts can be edited' }, { status: 403 });
         }
 
-        // Recalculate totals if line items changed
-        if (validated.lineItems) {
-            const subtotal = validated.lineItems.reduce((acc: number, item: any) => acc + (item.quantity * item.rate), 0);
+        if (validated.lineItems || validated.taxRate !== undefined || validated.discount !== undefined) {
+            const lineItems = validated.lineItems ?? invoice.lineItems;
             const taxRate = validated.taxRate ?? invoice.taxRate;
             const discount = validated.discount ?? invoice.discount;
-            const taxAmount = subtotal * (taxRate / 100);
-            (validated as any).subtotal = subtotal;
-            (validated as any).total = subtotal + taxAmount - discount;
+            const totals = calculateInvoiceTotals(lineItems, taxRate, discount);
+
+            invoice.subtotal = totals.subtotal;
+            invoice.tax = totals.tax;
+            invoice.total = totals.total;
         }
 
         Object.assign(invoice, validated);
         await invoice.save();
 
-        const sanitized = invoice.toObject();
-        delete (sanitized as any).__v;
-
-        return NextResponse.json(sanitized);
-    } catch (error) {
+        return NextResponse.json(serializeInvoiceRecord(invoice.toObject()));
+    } catch (error: unknown) {
+        if (error instanceof z.ZodError) {
+            return NextResponse.json({ message: error.issues[0]?.message ?? 'Invalid invoice update' }, { status: 400 });
+        }
         return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
     }
 }

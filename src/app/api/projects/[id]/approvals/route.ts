@@ -6,7 +6,12 @@ import Approval from '@/lib/models/Approval';
 import Project from '@/lib/models/Project';
 import { sendEmail } from '@/lib/email';
 import { ApprovalRequestEmail } from '@/emails/approval-request';
+import Notification from '@/lib/models/Notification';
+import { serializeApprovalRecord } from '@/lib/serializers';
 import * as z from 'zod';
+
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 import { approvalSchema } from '@/lib/validation';
 
@@ -20,10 +25,10 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
         const approvals = await Approval.find({ projectId })
             .select('-__v')
             .sort({ createdAt: -1 })
-            .populate('fileId')
+            .populate('fileId', 'name originalName mimeType size')
             .lean();
 
-        return NextResponse.json(approvals);
+        return NextResponse.json(approvals.map((approval) => serializeApprovalRecord(approval)));
     } catch (error) {
         return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
     }
@@ -42,15 +47,23 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         const project = await Project.findOne({ _id: projectId, freelancerId: session.user.id });
         if (!project) return NextResponse.json({ message: 'Project not found' }, { status: 404 });
 
-        const approval = (await Approval.create({
+        const approval = await Approval.create({
             ...validated,
             projectId,
             freelancerId: session.user.id,
             status: 'pending',
-            comments: []
-        })).toObject() as any;
+            comments: [],
+        });
 
-        delete approval.__v;
+        await Notification.create({
+            freelancerId: session.user.id,
+            projectId,
+            type: 'APPROVAL_REQUESTED',
+            metadata: {
+                approvalId: approval._id.toString(),
+                title: approval.title,
+            },
+        });
 
         // Send Email to Client
         try {
@@ -70,8 +83,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
             console.error('Email error:', e);
         }
 
-        return NextResponse.json(approval, { status: 201 });
-    } catch (error: any) {
+        await approval.populate('fileId', 'name originalName mimeType size');
+
+        return NextResponse.json(serializeApprovalRecord(approval.toObject()), { status: 201 });
+    } catch (error: unknown) {
         if (error instanceof z.ZodError) {
             return NextResponse.json({ message: error.issues[0].message }, { status: 400 });
         }

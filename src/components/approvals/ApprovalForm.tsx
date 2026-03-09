@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { Send, Loader2 } from 'lucide-react';
+import type { FileListResponse, FileRecord } from '@/lib/contracts';
 
 // Glass Components
 import { GlassModal } from '@/components/glass/GlassModal';
@@ -36,7 +37,7 @@ interface ApprovalFormProps {
 }
 
 export function ApprovalForm({ projectId, isOpen, onClose, onSuccess }: ApprovalFormProps) {
-    const [files, setFiles] = useState<any[]>([]);
+    const [files, setFiles] = useState<FileRecord[]>([]);
 
     const {
         register,
@@ -61,10 +62,12 @@ export function ApprovalForm({ projectId, isOpen, onClose, onSuccess }: Approval
         try {
             const res = await fetch(`/api/projects/${projectId}/files`);
             if (res.ok) {
-                const data = await res.json();
-                setFiles(data);
+                const data = (await res.json()) as FileListResponse;
+                setFiles(data.items);
             }
-        } catch (e) { }
+        } catch {
+            setFiles([]);
+        }
     };
 
     const onSubmit = async (values: ApprovalFormValues) => {
@@ -100,7 +103,7 @@ export function ApprovalForm({ projectId, isOpen, onClose, onSuccess }: Approval
                     <div className="space-y-3">
                         <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Asset Category</label>
                         <Select
-                            onValueChange={(val: any) => setValue('type', val)}
+                            onValueChange={(val) => setValue('type', val as ApprovalFormValues['type'])}
                             defaultValue="file"
                         >
                             <SelectTrigger className="h-14 border-none bg-white/5 hover:bg-white/10 px-6 rounded-2xl font-bold text-sm ring-0 focus:ring-0">
@@ -118,14 +121,14 @@ export function ApprovalForm({ projectId, isOpen, onClose, onSuccess }: Approval
 
                     <div className="space-y-3">
                         <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Reference File</label>
-                        <Select onValueChange={(val: any) => setValue('fileId', val)}>
+                        <Select onValueChange={(val) => setValue('fileId', val)}>
                             <SelectTrigger className="h-14 border-none bg-white/5 hover:bg-white/10 px-6 rounded-2xl font-bold text-sm ring-0 focus:ring-0">
                                 <SelectValue placeholder="Link asset..." />
                             </SelectTrigger>
                             <SelectContent className="glass-card border-white/10 rounded-2xl p-2 shadow-2xl">
                                 {files.map(f => (
                                     <SelectItem key={f._id} value={f._id} className="rounded-xl focus:bg-indigo-600/10 font-bold">
-                                        {f.filename}
+                                        {f.originalName}
                                     </SelectItem>
                                 ))}
                                 {files.length === 0 && <p className="p-4 text-xs text-[var(--text-muted)] italic text-white/40 font-bold">No files found</p>}

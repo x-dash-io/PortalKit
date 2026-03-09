@@ -16,6 +16,7 @@ import { CommentThread } from './CommentThread';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
+import type { ApprovalRecord } from '@/lib/contracts';
 
 // Glass Components
 import { GlassCard } from '@/components/glass/GlassCard';
@@ -23,20 +24,26 @@ import { GlassBadge } from '@/components/glass/GlassBadge';
 import { GlassButton } from '@/components/glass/GlassButton';
 
 interface ApprovalCardProps {
-    approval: any;
+    approval: ApprovalRecord;
     projectId: string;
     view: 'freelancer' | 'client';
     onRefresh: () => void;
+    portalToken?: string;
 }
 
-export function ApprovalCard({ approval, projectId, view, onRefresh }: ApprovalCardProps) {
+export function ApprovalCard({ approval, projectId, view, onRefresh, portalToken }: ApprovalCardProps) {
     const [isExpanded, setIsExpanded] = useState(false);
     const [responseLoading, setResponseLoading] = useState<string | null>(null);
 
     const handleResponse = async (status: 'approved' | 'changes_requested') => {
         setResponseLoading(status);
         try {
-            const res = await fetch(`/api/projects/${projectId}/approvals/${approval._id}/respond`, {
+            const endpoint =
+                view === 'client' && portalToken
+                    ? `/api/portal/${portalToken}/approvals/${approval._id}/respond`
+                    : `/api/projects/${projectId}/approvals/${approval._id}/respond`;
+
+            const res = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status })
@@ -122,7 +129,7 @@ export function ApprovalCard({ approval, projectId, view, onRefresh }: ApprovalC
                                         </div>
                                     )}
 
-                                    {approval.fileId && (
+                                    {approval.file && (
                                         <div className="space-y-3">
                                             <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Attached Artifact</label>
                                             <div className="flex items-center justify-between p-4 glass-card bg-white/[0.02] border-white/5 rounded-2xl group/file">
@@ -130,7 +137,9 @@ export function ApprovalCard({ approval, projectId, view, onRefresh }: ApprovalC
                                                     <div className="h-10 w-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400">
                                                         <FileIcon size={20} />
                                                     </div>
-                                                    <span className="text-sm font-bold text-white">{approval.fileId.filename}</span>
+                                                    <span className="text-sm font-bold text-white">
+                                                        {approval.file.originalName}
+                                                    </span>
                                                 </div>
                                                 <GlassButton variant="ghost" size="sm" className="rounded-xl h-9">
                                                     View Asset
@@ -174,6 +183,7 @@ export function ApprovalCard({ approval, projectId, view, onRefresh }: ApprovalC
                                         projectId={projectId}
                                         initialComments={approval.comments}
                                         currentUserType={view}
+                                        portalToken={portalToken}
                                     />
                                 </div>
                             </div>

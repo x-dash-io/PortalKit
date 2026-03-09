@@ -1,12 +1,16 @@
 'use client';
 
-import React, { useEffect } from 'react';
-import { useThemeStore } from '@/lib/store/themeStore';
+import React, { useEffect, useTransition } from 'react';
+import { useThemeStore } from '@/lib/store/useThemeStore';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { type AppTheme } from '@/lib/contracts';
+import { useSession } from 'next-auth/react';
 
 export function ThemeSwitcher() {
     const { theme, setTheme } = useThemeStore();
+    const { update } = useSession();
+    const [isPending, startTransition] = useTransition();
 
     useEffect(() => {
         document.documentElement.dataset.theme = theme;
@@ -18,16 +22,28 @@ export function ThemeSwitcher() {
         { id: 'aurora', label: 'Aurora', class: 'bg-fuchsia-600 border-fuchsia-400' },
     ] as const;
 
-    const handleSetTheme = async (newTheme: 'frost' | 'obsidian' | 'aurora') => {
+    const handleSetTheme = async (newTheme: AppTheme) => {
         setTheme(newTheme);
-        // Optionally PATCH /api/user/settings if user is logged in
+
         try {
-            await fetch('/api/user/settings', {
+            const response = await fetch('/api/user/settings', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ theme: newTheme }),
             });
-        } catch (e) { }
+
+            if (response.ok) {
+                startTransition(() => {
+                    void update({
+                        user: {
+                            theme: newTheme,
+                        },
+                    });
+                });
+            }
+        } catch {
+            // Local theme still applies even if persistence fails.
+        }
     };
 
     return (
@@ -38,6 +54,7 @@ export function ThemeSwitcher() {
                     onClick={() => handleSetTheme(t.id)}
                     className="relative group"
                     title={t.label}
+                    disabled={isPending}
                 >
                     <motion.div
                         animate={{

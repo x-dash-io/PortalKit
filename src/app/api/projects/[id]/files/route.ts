@@ -4,6 +4,11 @@ import { authOptions } from '@/lib/auth';
 import connectDB from '@/lib/mongodb';
 import Project from '@/lib/models/Project';
 import File from '@/lib/models/File';
+import { serializeFileListResponse } from '@/lib/serializers';
+import { Types } from 'mongoose';
+
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function GET(
     req: Request,
@@ -25,26 +30,28 @@ export async function GET(
         const project = await Project.findOne({ _id: projectId, freelancerId: session.user.id });
         if (!project) return NextResponse.json({ message: 'Project not found' }, { status: 404 });
 
-        const query: any = { projectId, status: 'active' };
+        const query: Record<string, unknown> = { projectId, status: 'active' };
         if (folder && folder !== 'All Files') {
             query.folder = folder;
         }
-        if (cursor) {
-            query._id = { $lt: cursor }; // Cursor-based: fetch items created before this ID
+        if (cursor && Types.ObjectId.isValid(cursor)) {
+            query._id = { $lt: new Types.ObjectId(cursor) };
         }
 
         const files = await File.find(query)
-            .sort({ _id: -1 }) // Sort by ID desc for consistent cursor
+            .sort({ _id: -1 })
             .limit(limit)
             .select('-__v')
             .lean();
 
         const nextCursor = files.length === limit ? files[files.length - 1]._id : null;
 
-        return NextResponse.json({
-            files,
-            nextCursor
-        });
+        return NextResponse.json(
+            serializeFileListResponse({
+                items: files,
+                nextCursor,
+            })
+        );
     } catch (error) {
         console.error('List files error:', error);
         return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });

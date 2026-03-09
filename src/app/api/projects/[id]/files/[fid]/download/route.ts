@@ -6,6 +6,9 @@ import Project from '@/lib/models/Project';
 import File from '@/lib/models/File';
 import { getPresignedDownloadUrl } from '@/lib/r2';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 export async function GET(
     req: Request,
     { params }: { params: Promise<{ id: string; fid: string }> }

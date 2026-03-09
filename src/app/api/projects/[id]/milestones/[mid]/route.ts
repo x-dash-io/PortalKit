@@ -4,6 +4,11 @@ import { authOptions } from '@/lib/auth';
 import connectDB from '@/lib/mongodb';
 import Project from '@/lib/models/Project';
 import { milestoneSchema } from '@/lib/validation';
+import { serializeMilestone } from '@/lib/serializers';
+import * as z from 'zod';
+
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function PATCH(
     req: Request,
@@ -19,10 +24,11 @@ export async function PATCH(
 
         await connectDB();
 
-        const updateDoc: any = {};
+        const updateDoc: Record<string, unknown> = {};
         if (validated.title) updateDoc['milestones.$.title'] = validated.title;
         if (validated.status) updateDoc['milestones.$.status'] = validated.status;
         if (validated.dueDate) updateDoc['milestones.$.dueDate'] = new Date(validated.dueDate);
+        if (validated.order !== undefined) updateDoc['milestones.$.order'] = validated.order;
 
         const project = await Project.findOneAndUpdate(
             {
@@ -36,9 +42,14 @@ export async function PATCH(
 
         if (!project) return NextResponse.json({ message: 'Milestone not found' }, { status: 404 });
 
-        const milestone = project.milestones.find((m: any) => m._id.toString() === milestoneId);
-        return NextResponse.json(milestone);
-    } catch (error: any) {
+        const milestone = project.milestones.find((milestone) => milestone._id?.toString() === milestoneId);
+        if (!milestone) return NextResponse.json({ message: 'Milestone not found' }, { status: 404 });
+
+        return NextResponse.json(serializeMilestone(milestone));
+    } catch (error: unknown) {
+        if (error instanceof z.ZodError) {
+            return NextResponse.json({ message: error.issues[0]?.message ?? 'Invalid milestone update' }, { status: 400 });
+        }
         return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
     }
 }

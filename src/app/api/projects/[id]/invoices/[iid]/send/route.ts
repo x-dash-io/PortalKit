@@ -8,6 +8,10 @@ import { sendEmail } from '@/lib/email';
 import { InvoiceSentEmail } from '@/emails/invoice-sent';
 import { PortalAccessEmail } from '@/emails/portal-access';
 import User from '@/lib/models/User';
+import Notification from '@/lib/models/Notification';
+
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function POST(
     req: Request,
@@ -35,6 +39,16 @@ export async function POST(
         invoice.sentAt = new Date();
         await invoice.save();
 
+        await Notification.create({
+            freelancerId: session.user.id,
+            type: 'INVOICE_SENT',
+            projectId,
+            metadata: {
+                invoiceId: invoice._id.toString(),
+                invoiceNumber: invoice.invoiceNumber,
+            },
+        });
+
         // Send email via Resend
         try {
             const portalUrl = `${process.env.NEXTAUTH_URL}/portal/${project.portalTokenPrefix}`;
@@ -49,7 +63,7 @@ export async function POST(
                     invoiceNumber: invoice.invoiceNumber,
                     amount: `${invoice.currency} ${invoice.total.toLocaleString()}`,
                     dueDate: invoice.dueDate.toLocaleDateString(),
-                    portalUrl: `${portalUrl}/invoices/${invoice._id}`
+                    portalUrl
                 }
             );
 

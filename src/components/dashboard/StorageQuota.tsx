@@ -4,10 +4,8 @@ import React, { useEffect, useState } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { HardDrive } from 'lucide-react';
 import bytes from 'bytes';
-import { useSession } from 'next-auth/react';
 
 export function StorageQuota() {
-    const { data: session, update } = useSession();
     const [storageUsed, setStorageUsed] = useState(0);
     const quota = 5 * 1024 * 1024 * 1024; // 5GB limit
 
@@ -15,10 +13,10 @@ export function StorageQuota() {
         // Fetch current user data for storage
         const fetchStorage = async () => {
             try {
-                const res = await fetch('/api/auth/session');
+                const res = await fetch('/api/user/settings');
                 const data = await res.json();
-                if (data?.user?.storageUsed !== undefined) {
-                    setStorageUsed(data.user.storageUsed);
+                if (data?.storageUsed !== undefined) {
+                    setStorageUsed(data.storageUsed);
                 }
             } catch (error) {
                 console.error('Failed to fetch storage info');

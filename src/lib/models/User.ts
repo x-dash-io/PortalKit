@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
+import { APP_THEMES, DEFAULT_EMAIL_PREFERENCES, USER_PLANS } from '@/lib/contracts';
 
 export interface IUser extends Document {
     email: string;
@@ -29,15 +30,15 @@ const UserSchema = new Schema<IUser>(
         avatar: { type: String },
         logo: { type: String },
         accentColor: { type: String },
-        theme: { type: String, enum: ['frost', 'obsidian', 'aurora'], default: 'frost' },
-        plan: { type: String, enum: ['free', 'pro'], default: 'free' },
+        theme: { type: String, enum: APP_THEMES, default: 'frost' },
+        plan: { type: String, enum: USER_PLANS, default: 'free' },
         storageUsed: { type: Number, default: 0 },
         lastInvoiceNumber: { type: Number, default: 0 },
         emailPreferences: {
-            invoiceViewed: { type: Boolean, default: true },
-            approvalResponded: { type: Boolean, default: true },
-            portalVisited: { type: Boolean, default: false },
-            overdueReminders: { type: Boolean, default: true },
+            invoiceViewed: { type: Boolean, default: DEFAULT_EMAIL_PREFERENCES.invoiceViewed },
+            approvalResponded: { type: Boolean, default: DEFAULT_EMAIL_PREFERENCES.approvalResponded },
+            portalVisited: { type: Boolean, default: DEFAULT_EMAIL_PREFERENCES.portalVisited },
+            overdueReminders: { type: Boolean, default: DEFAULT_EMAIL_PREFERENCES.overdueReminders },
         },
     },
     { timestamps: true }

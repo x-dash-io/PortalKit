@@ -27,7 +27,7 @@ export default function Error({
                 <div className="space-y-2">
                     <h1 className="text-2xl font-bold tracking-tight">Something went wrong</h1>
                     <p className="text-[var(--text-secondary)]">
-                        An unexpected error occurred. We've been notified and are looking into it.
+                        An unexpected error occurred. We&apos;ve been notified and are looking into it.
                     </p>
                 </div>
 

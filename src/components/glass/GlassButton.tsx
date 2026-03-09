@@ -10,7 +10,7 @@ interface GlassButtonProps extends HTMLMotionProps<'button'> {
     size?: 'sm' | 'md' | 'lg' | 'icon';
     loading?: boolean;
     icon?: React.ReactNode;
-    theme?: string;
+    children?: React.ReactNode;
 }
 
 export const GlassButton = ({
@@ -20,12 +20,11 @@ export const GlassButton = ({
     size = 'md',
     loading = false,
     icon,
-    theme,
     ...props
 }: GlassButtonProps) => {
     const variants: Record<string, string> = {
         primary: 'bg-[var(--accent)] text-white shadow-[var(--glow)] hover:opacity-90',
-        secondary: 'glass-card border-white/5 bg-[var(--bg-glass)] text-[var(--text-primary)] hover:bg-[var(--bg-glass-hover)]',
+        secondary: 'border border-[var(--border-subtle)] bg-[var(--surface)] text-[var(--text-primary)] shadow-[var(--shadow-soft)] hover:bg-[var(--muted)]',
         ghost: 'bg-transparent text-[var(--text-secondary)] hover:bg-[var(--accent-light)] hover:text-[var(--accent)]',
         danger: 'bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500 hover:text-white',
     };
@@ -52,9 +51,9 @@ export const GlassButton = ({
             {loading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : icon ? (
-                <span className="mr-2 flex items-center justify-center">{icon as any}</span>
+                <span className="mr-2 flex items-center justify-center">{icon}</span>
             ) : null}
-            {children as any}
+            {children}
         </motion.button>
     );
 };

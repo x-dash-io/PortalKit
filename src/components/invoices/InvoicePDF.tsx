@@ -1,5 +1,6 @@
 import React from 'react';
-import { Page, Text, View, Document, StyleSheet, Font } from '@react-pdf/renderer';
+import { Page, Text, View, Document, StyleSheet } from '@react-pdf/renderer';
+import type { InvoiceRecord } from '@/lib/contracts';
 
 const styles = StyleSheet.create({
     page: {
@@ -93,8 +94,11 @@ const styles = StyleSheet.create({
 });
 
 interface InvoicePDFProps {
-    invoice: any;
-    freelancer: any;
+    invoice: InvoiceRecord;
+    freelancer: {
+        name?: string | null;
+        email?: string | null;
+    } | null;
 }
 
 export const InvoicePDF = ({ invoice, freelancer }: InvoicePDFProps) => {
@@ -111,8 +115,8 @@ export const InvoicePDF = ({ invoice, freelancer }: InvoicePDFProps) => {
                 <View style={styles.header}>
                     <View style={styles.companyInfo}>
                         <Text style={styles.title}>INVOICE</Text>
-                        <Text style={{ marginTop: 4 }}>{freelancer.name}</Text>
-                        <Text>{freelancer.email}</Text>
+                        <Text style={{ marginTop: 4 }}>{freelancer?.name ?? 'PortalKit Freelancer'}</Text>
+                        <Text>{freelancer?.email ?? ''}</Text>
                     </View>
                     <View style={styles.invoiceInfo}>
                         <Text style={{ fontWeight: 'bold' }}>#{invoice.invoiceNumber}</Text>
@@ -134,7 +138,7 @@ export const InvoicePDF = ({ invoice, freelancer }: InvoicePDFProps) => {
                         <Text style={styles.colRate}>Rate</Text>
                         <Text style={styles.colAmount}>Amount</Text>
                     </View>
-                    {invoice.lineItems.map((item: any, i: number) => (
+                    {invoice.lineItems.map((item, i) => (
                         <View key={i} style={styles.tableRow}>
                             <Text style={styles.colDesc}>{item.description}</Text>
                             <Text style={styles.colQty}>{item.quantity}</Text>

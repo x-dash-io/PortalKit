@@ -4,6 +4,11 @@ import { authOptions } from '@/lib/auth';
 import connectDB from '@/lib/mongodb';
 import Project from '@/lib/models/Project';
 import * as z from 'zod';
+import { getProjectCounts } from '@/lib/projectCounts';
+import { serializeProjectDetail } from '@/lib/serializers';
+
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 import { projectSchema } from '@/lib/validation';
 
@@ -22,7 +27,15 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
         if (!project) return NextResponse.json({ message: 'Project not found' }, { status: 404 });
 
-        return NextResponse.json(project);
+        const counts = await getProjectCounts([id]);
+
+        return NextResponse.json(
+            serializeProjectDetail(project, {
+                approvals: counts.approvals[id] ?? 0,
+                files: counts.files[id] ?? 0,
+                invoices: counts.invoices[id] ?? 0,
+            })
+        );
     } catch (error) {
         return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
     }
@@ -46,8 +59,16 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
         if (!project) return NextResponse.json({ message: 'Project not found' }, { status: 404 });
 
-        return NextResponse.json(project);
-    } catch (error: any) {
+        const counts = await getProjectCounts([id]);
+
+        return NextResponse.json(
+            serializeProjectDetail(project, {
+                approvals: counts.approvals[id] ?? 0,
+                files: counts.files[id] ?? 0,
+                invoices: counts.invoices[id] ?? 0,
+            })
+        );
+    } catch (error: unknown) {
         if (error instanceof z.ZodError) {
             return NextResponse.json({ message: error.issues[0].message }, { status: 400 });
         }

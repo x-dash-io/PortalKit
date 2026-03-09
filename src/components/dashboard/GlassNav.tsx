@@ -3,118 +3,108 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
-import {
-    LayoutDashboard,
-    FolderKanban,
-    FileText,
-    CheckCircle2,
-    Settings,
-    Bell,
-    PanelLeftClose,
-    PanelLeftOpen
-} from 'lucide-react';
+import { FolderKanban, LayoutDashboard, PanelLeftClose, PanelLeftOpen, Settings, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUIStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
-
 import { ThemeSwitcher } from '@/components/themes/ThemeSwitcher';
 
 const navItems = [
-    { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { name: 'Projects', href: '/dashboard/projects', icon: FolderKanban },
-    { name: 'Settings', href: '/dashboard/settings', icon: Settings },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Projects', href: '/dashboard/projects', icon: FolderKanban },
+  { name: 'Settings', href: '/dashboard/settings', icon: Settings },
 ];
 
 export function GlassNav() {
-    const pathname = usePathname();
-    const { sidebarOpen, setSidebarOpen } = useUIStore();
+  const pathname = usePathname();
+  const { sidebarOpen, setSidebarOpen } = useUIStore();
 
-    return (
-        <>
-            {/* Desktop Sidebar */}
-            <motion.aside
-                initial={false}
-                animate={{ width: sidebarOpen ? 260 : 88 }}
+  return (
+    <>
+      <motion.aside
+        initial={false}
+        animate={{ width: sidebarOpen ? 272 : 96 }}
+        transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+        className={cn(
+          'fixed left-0 top-0 z-50 hidden h-screen flex-col border-r border-[var(--border-subtle)] bg-[color-mix(in_srgb,var(--surface-elevated)_92%,transparent)] px-4 py-5 backdrop-blur-xl md:flex',
+          !sidebarOpen && 'items-center'
+        )}
+      >
+        <div className="flex w-full items-center justify-between gap-3 px-2">
+          <div className="flex items-center gap-3 overflow-hidden">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--accent)] text-white shadow-[var(--glow)]">
+              <ShieldCheck size={20} />
+            </div>
+            {sidebarOpen && (
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[var(--text-muted)]">PortalKit</p>
+                <p className="text-xs text-[var(--text-secondary)]">Client operations</p>
+              </div>
+            )}
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="rounded-2xl text-[var(--text-secondary)] hover:bg-[var(--accent-light)] hover:text-[var(--accent)]"
+          >
+            {sidebarOpen ? <PanelLeftClose size={20} /> : <PanelLeftOpen size={20} />}
+          </Button>
+        </div>
+
+        <nav className="mt-8 flex-1 space-y-2">
+          {navItems.map((item) => {
+            const isActive = item.href === '/dashboard' ? pathname === item.href : pathname.startsWith(item.href);
+
+            return (
+              <Link key={item.name} href={item.href}>
+                <div
+                  className={cn(
+                    'group relative flex items-center gap-3 overflow-hidden rounded-3xl border px-4 py-3.5 transition-all',
+                    isActive
+                      ? 'border-[var(--accent)]/15 bg-[var(--accent-light)] text-[var(--accent)]'
+                      : 'border-transparent text-[var(--text-secondary)] hover:border-[var(--border-subtle)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)]'
+                  )}
+                >
+                  {isActive && (
+                    <motion.div layoutId="nav-highlight" className="absolute inset-y-2 left-2 w-1 rounded-full bg-[var(--accent)]" />
+                  )}
+                  <item.icon size={20} className="shrink-0" />
+                  {sidebarOpen && <span className="truncate text-sm font-semibold">{item.name}</span>}
+                </div>
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className={cn('space-y-4 border-t border-[var(--border-subtle)] px-2 pt-5', !sidebarOpen && 'flex flex-col items-center')}>
+          {sidebarOpen && (
+            <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--text-muted)]">Workspace theme</p>
+          )}
+          <ThemeSwitcher />
+        </div>
+      </motion.aside>
+
+      <nav className="fixed bottom-4 left-4 right-4 z-50 flex h-18 items-center justify-around rounded-[2rem] border border-[var(--border-subtle)] bg-[color-mix(in_srgb,var(--surface-elevated)_92%,transparent)] px-4 shadow-[var(--shadow-soft)] backdrop-blur-xl md:hidden">
+        {navItems.map((item) => {
+          const isActive = item.href === '/dashboard' ? pathname === item.href : pathname.startsWith(item.href);
+
+          return (
+            <Link key={item.name} href={item.href} className="flex flex-col items-center gap-1">
+              <div
                 className={cn(
-                    "hidden md:flex flex-col fixed left-0 top-0 h-screen glass-card rounded-none border-y-0 border-l-0 z-50 transition-all duration-500",
-                    !sidebarOpen && "items-center"
+                  'rounded-2xl p-3 transition-all',
+                  isActive
+                    ? 'bg-[var(--accent-light)] text-[var(--accent)]'
+                    : 'text-[var(--text-secondary)]'
                 )}
-            >
-                <div className="p-8 flex items-center justify-between w-full">
-                    {sidebarOpen && (
-                        <motion.span
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            className="text-2xl font-black tracking-tighter text-[var(--accent)]"
-                        >
-                            PortalKit
-                        </motion.span>
-                    )}
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setSidebarOpen(!sidebarOpen)}
-                        className="hover:bg-[var(--accent-light)] hover:text-[var(--accent)] rounded-xl"
-                    >
-                        {sidebarOpen ? <PanelLeftClose size={20} /> : <PanelLeftOpen size={20} />}
-                    </Button>
-                </div>
-
-                <nav className="flex-1 px-4 space-y-2 mt-4">
-                    {navItems.map((item) => {
-                        const isActive = pathname === item.href;
-                        return (
-                            <Link key={item.name} href={item.href}>
-                                <div className={cn(
-                                    "flex items-center p-3.5 rounded-2xl transition-all duration-300 group relative overflow-hidden",
-                                    isActive
-                                        ? "bg-[var(--accent-light)] text-[var(--accent)]"
-                                        : "hover:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                                )}>
-                                    <item.icon size={22} className={cn("transition-colors", isActive && "text-[var(--accent)]")} />
-                                    {sidebarOpen && <span className="ml-3 font-bold text-sm tracking-tight">{item.name}</span>}
-                                    {isActive && (
-                                        <motion.div
-                                            layoutId="nav-active"
-                                            className="absolute left-0 w-1.5 h-6 bg-[var(--accent)] rounded-r-full shadow-[0_0_10px_var(--accent)]"
-                                        />
-                                    )}
-                                </div>
-                            </Link>
-                        );
-                    })}
-                </nav>
-
-                <div className="p-6 space-y-6">
-                    <div className="divider" />
-                    <div className={cn("flex flex-col gap-4", !sidebarOpen && "items-center")}>
-                        {sidebarOpen && <span className="text-[10px] uppercase font-black tracking-widest text-[var(--text-muted)] ml-2">App Theme</span>}
-                        <ThemeSwitcher />
-                    </div>
-                </div>
-            </motion.aside>
-
-            {/* Mobile Bottom Nav */}
-            <nav className="md:hidden fixed bottom-6 left-6 right-6 h-18 glass-card flex items-center justify-around z-50 px-4 rounded-3xl border-white/10 shadow-2xl shadow-black/20">
-                {navItems.map((item) => {
-                    const isActive = pathname === item.href;
-                    return (
-                        <Link key={item.name} href={item.href} className="flex flex-col items-center">
-                            <div className={cn(
-                                "p-3 rounded-2xl transition-all duration-300",
-                                isActive
-                                    ? "bg-[var(--accent-light)] text-[var(--accent)] scale-110 shadow-lg"
-                                    : "text-[var(--text-secondary)]"
-                            )}>
-                                <item.icon size={24} />
-                            </div>
-                        </Link>
-                    );
-                })}
-                <div className="w-10 h-10 flex items-center justify-center">
-                    <ThemeSwitcher />
-                </div>
-            </nav>
-        </>
-    );
+              >
+                <item.icon size={22} />
+              </div>
+            </Link>
+          );
+        })}
+      </nav>
+    </>
+  );
 }

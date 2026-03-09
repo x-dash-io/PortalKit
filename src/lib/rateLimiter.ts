@@ -14,7 +14,7 @@ export const rateLimiter = (limit: number, window: string = "60 s") => {
 
     return new Ratelimit({
         redis,
-        limiter: Ratelimit.slidingWindow(limit, window as any),
+        limiter: Ratelimit.slidingWindow(limit, window as `${number} ${'s' | 'm' | 'h' | 'd'}`),
         analytics: true,
     });
 };

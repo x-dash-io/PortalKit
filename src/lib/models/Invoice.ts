@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Model, Types } from 'mongoose';
+import { INVOICE_STATUSES } from '@/lib/contracts';
 
 export interface ILineItem {
     description: string;
@@ -21,6 +22,7 @@ export interface IInvoice extends Document {
     currency: string;
     clientName: string;
     clientEmail: string;
+    issueDate: Date;
     dueDate: Date;
     paidAt?: Date;
     notes?: string;
@@ -44,7 +46,7 @@ const InvoiceSchema = new Schema<IInvoice>(
         invoiceNumber: { type: String, required: true },
         status: {
             type: String,
-            enum: ['draft', 'sent', 'viewed', 'paid', 'overdue'],
+            enum: INVOICE_STATUSES,
             default: 'draft',
         },
         lineItems: [LineItemSchema],
@@ -56,6 +58,7 @@ const InvoiceSchema = new Schema<IInvoice>(
         currency: { type: String, default: 'USD' },
         clientName: { type: String, required: true },
         clientEmail: { type: String, required: true },
+        issueDate: { type: Date, required: true },
         dueDate: { type: Date, required: true },
         paidAt: { type: Date },
         notes: { type: String },
@@ -63,7 +66,7 @@ const InvoiceSchema = new Schema<IInvoice>(
         viewedAt: { type: Date },
         overdueNotified: { type: Boolean, default: false },
     },
-    { timestamps: { createdAt: true, updatedAt: false } }
+    { timestamps: true }
 );
 
 InvoiceSchema.index({ projectId: 1 });

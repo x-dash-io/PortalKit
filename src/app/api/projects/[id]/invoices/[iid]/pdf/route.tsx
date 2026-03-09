@@ -6,6 +6,12 @@ import Invoice from '@/lib/models/Invoice';
 import User from '@/lib/models/User';
 import ReactPDF from '@react-pdf/renderer';
 import { InvoicePDF } from '@/components/invoices/InvoicePDF';
+import type { ReactElement } from 'react';
+import type { DocumentProps } from '@react-pdf/renderer';
+import { serializeInvoiceRecord } from '@/lib/serializers';
+
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function GET(
     req: Request,
@@ -28,10 +34,10 @@ export async function GET(
         const user = await User.findById(session.user.id).lean();
 
         const stream = await ReactPDF.renderToStream(
-            <InvoicePDF invoice={ invoice } freelancer = { user } />
-    );
+            <InvoicePDF invoice={serializeInvoiceRecord(invoice)} freelancer={user} /> as ReactElement<DocumentProps>
+        );
 
-        return new Response(stream as any, {
+        return new Response(stream as unknown as BodyInit, {
             headers: {
                 'Content-Type': 'application/pdf',
                 'Content-Disposition': `inline; filename=invoice-${invoice.invoiceNumber}.pdf`,

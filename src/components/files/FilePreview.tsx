@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
     Dialog,
     DialogContent,
@@ -8,56 +8,111 @@ import {
     DialogTitle
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Download, ExternalLink, FileQuestion, Loader2 } from 'lucide-react';
+import { Download, FileQuestion, Loader2, UploadCloud } from 'lucide-react';
 import bytes from 'bytes';
 import { toast } from 'sonner';
-
-interface FileDoc {
-    _id: string;
-    name: string;
-    mimeType: string;
-    size: number;
-}
+import type { FileRecord } from '@/lib/contracts';
 
 interface FilePreviewProps {
-    file: FileDoc | null;
+    file: FileRecord | null;
     projectId: string;
     onClose: () => void;
+    onVersionUploaded?: () => void;
 }
 
-export function FilePreview({ file, projectId, onClose }: FilePreviewProps) {
+export function FilePreview({ file, projectId, onClose, onVersionUploaded }: FilePreviewProps) {
     const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [uploadingVersion, setUploadingVersion] = useState(false);
+    const inputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        if (file) {
-            getDownloadUrl();
-        } else {
+        if (!file) {
             setDownloadUrl(null);
+            return;
         }
-    }, [file]);
 
-    const getDownloadUrl = async () => {
-        if (!file) return;
-        setLoading(true);
-        try {
-            const res = await fetch(`/api/projects/${projectId}/files/${file._id}/download`);
-            if (!res.ok) throw new Error('Failed to get preview URL');
-            const data = await res.json();
-            setDownloadUrl(data.downloadUrl);
-        } catch (error) {
-            toast.error('Could not load preview');
-            onClose();
-        } finally {
-            setLoading(false);
-        }
-    };
+        let cancelled = false;
+
+        const getDownloadUrl = async () => {
+            setLoading(true);
+            try {
+                const res = await fetch(`/api/projects/${projectId}/files/${file._id}/download`);
+                if (!res.ok) throw new Error('Failed to get preview URL');
+                const data = await res.json();
+                if (!cancelled) {
+                    setDownloadUrl(data.downloadUrl);
+                }
+            } catch {
+                toast.error('Could not load preview');
+                onClose();
+            } finally {
+                if (!cancelled) {
+                    setLoading(false);
+                }
+            }
+        };
+
+        void getDownloadUrl();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [file, onClose, projectId]);
 
     if (!file) return null;
 
     const isImage = file.mimeType.startsWith('image/');
     const isPDF = file.mimeType === 'application/pdf';
     const isVideo = file.mimeType.startsWith('video/');
+
+    const handleVersionUpload = async (nextFile: File | undefined) => {
+        if (!nextFile || !file) return;
+
+        setUploadingVersion(true);
+        try {
+            const versionResponse = await fetch(`/api/projects/${projectId}/files/${file._id}/version`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    filename: nextFile.name,
+                    mimeType: nextFile.type,
+                    size: nextFile.size,
+                }),
+            });
+
+            if (!versionResponse.ok) throw new Error('Failed to prepare version upload');
+
+            const { uploadUrl } = (await versionResponse.json()) as { uploadUrl: string };
+            const uploadResult = await fetch(uploadUrl, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': nextFile.type,
+                },
+                body: nextFile,
+            });
+
+            if (!uploadResult.ok) throw new Error('Upload failed');
+
+            const confirmResponse = await fetch(`/api/projects/${projectId}/files/confirm`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fileId: file._id }),
+            });
+
+            if (!confirmResponse.ok) throw new Error('Failed to activate new version');
+
+            toast.success('New file version uploaded');
+            onVersionUploaded?.();
+        } catch {
+            toast.error('Could not upload a new version');
+        } finally {
+            setUploadingVersion(false);
+            if (inputRef.current) {
+                inputRef.current.value = '';
+            }
+        }
+    };
 
     return (
         <Dialog open={!!file} onOpenChange={(open) => !open && onClose()}>
@@ -79,6 +134,22 @@ export function FilePreview({ file, projectId, onClose }: FilePreviewProps) {
                             <Download size={16} />
                             Download
                         </Button>
+                        <input
+                            ref={inputRef}
+                            type="file"
+                            className="hidden"
+                            onChange={(event) => void handleVersionUpload(event.target.files?.[0])}
+                        />
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="gap-2 hover:bg-white/10"
+                            disabled={uploadingVersion}
+                            onClick={() => inputRef.current?.click()}
+                        >
+                            {uploadingVersion ? <Loader2 className="size-4 animate-spin" /> : <UploadCloud size={16} />}
+                            New Version
+                        </Button>
                     </div>
                 </DialogHeader>
 
@@ -93,7 +164,7 @@ export function FilePreview({ file, projectId, onClose }: FilePreviewProps) {
                             {isImage && (
                                 <img
                                     src={downloadUrl}
-                                    alt={file.name}
+                                    alt={file.originalName}
                                     className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
                                 />
                             )}
@@ -101,7 +172,7 @@ export function FilePreview({ file, projectId, onClose }: FilePreviewProps) {
                                 <iframe
                                     src={`${downloadUrl}#toolbar=0`}
                                     className="w-full h-full rounded-lg bg-white"
-                                    title={file.name}
+                                    title={file.originalName}
                                 />
                             )}
                             {isVideo && (
@@ -131,6 +202,10 @@ export function FilePreview({ file, projectId, onClose }: FilePreviewProps) {
                             )}
                         </>
                     ) : null}
+                </div>
+
+                <div className="border-t border-white/5 px-6 py-4 text-xs text-[var(--text-muted)]">
+                    {file.versions.length > 0 ? `${file.versions.length} archived version(s) available on this asset.` : 'No prior versions yet.'}
                 </div>
             </DialogContent>
         </Dialog>

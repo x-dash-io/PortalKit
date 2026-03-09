@@ -5,6 +5,10 @@ import connectDB from '@/lib/mongodb';
 import Project from '@/lib/models/Project';
 import File from '@/lib/models/File';
 import { getPresignedUploadUrl, generateFileKey } from '@/lib/r2';
+import { serializeFileRecord } from '@/lib/serializers';
+
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function POST(
     req: Request,
@@ -16,7 +20,10 @@ export async function POST(
         if (!session) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 
         const body = await req.json();
-        const { filename, mimeType, size } = body;
+        const { filename, mimeType, size } = body as { filename?: string; mimeType?: string; size?: number };
+        if (!filename || !mimeType || !size) {
+            return NextResponse.json({ message: 'filename, mimeType, and size are required' }, { status: 400 });
+        }
 
         await connectDB();
 
@@ -30,42 +37,23 @@ export async function POST(
         const newFileKey = generateFileKey(projectId, filename);
         const uploadUrl = await getPresignedUploadUrl(newFileKey, mimeType);
 
-        // Move current r2Key to versions before it's updated (during confirm)
-        // Here we just prepare the new version. The actual swap will happen upon confirm.
-        // However, to keep it simple as requested: "Move current r2Key to versions array".
-
-        await File.updateOne(
-            { _id: fileId },
-            {
-                $push: {
-                    versions: {
-                        r2Key: existingFile.r2Key,
-                        versionDate: new Date()
-                    }
-                }
-            }
-        );
-
-        // We keep the File document, but we'll update r2Key and status to pending for the NEW version.
-        // Note: To avoid losing the file if confirmation fails, better approach is a new File doc or more complex state.
-        // For this lab, we'll follow the prompt literally: create new presigned URL.
-
-        // We update the doc to reflect the NEW pending version
-        await File.updateOne(
-            { _id: fileId },
-            {
-                $set: {
-                    r2Key: newFileKey,
-                    status: 'pending',
-                    size: size, // New size
-                    name: filename,
-                }
-            }
-        );
+        existingFile.versions.push({
+            r2Key: existingFile.r2Key,
+            uploadedAt: new Date(),
+            size: existingFile.size,
+        });
+        existingFile.r2Key = newFileKey;
+        existingFile.status = 'pending';
+        existingFile.size = size;
+        existingFile.name = filename;
+        existingFile.originalName = filename;
+        existingFile.mimeType = mimeType;
+        await existingFile.save();
 
         return NextResponse.json({
             uploadUrl,
             fileKey: newFileKey,
+            file: serializeFileRecord(existingFile.toObject()),
         });
     } catch (error) {
         console.error('Version error:', error);
