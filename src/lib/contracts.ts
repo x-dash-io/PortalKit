@@ -159,6 +159,7 @@ export interface NotificationRecord {
 export interface PortalPayload {
   theme: AppTheme;
   freelancerName: string;
+  freelancerLogo?: string;
   project: ProjectDetail;
   approvals: ApprovalRecord[];
   invoices: InvoiceRecord[];

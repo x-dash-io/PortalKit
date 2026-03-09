@@ -1,229 +1,179 @@
 'use client';
 
-import React, { useCallback, useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Upload, X, FileIcon, CheckCircle2 } from 'lucide-react';
-import { toast } from 'sonner';
-import { motion, AnimatePresence } from 'framer-motion';
+import { UploadCloud, FileIcon, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import bytes from 'bytes';
 
-// Glass Components
-import { GlassCard } from '@/components/glass/GlassCard';
-import { GlassBadge } from '@/components/glass/GlassBadge';
-
-interface FileUploaderProps {
-    projectId: string;
-    onComplete: () => void;
-    folder?: string;
-}
-
-interface UploadingFile {
+interface UploadFile {
     id: string;
     file: File;
     progress: number;
-    status: 'pending' | 'uploading' | 'confirming' | 'completed' | 'error';
+    status: 'pending' | 'uploading' | 'done' | 'error';
     error?: string;
 }
 
-export function FileUploader({ projectId, onComplete, folder = 'Root' }: FileUploaderProps) {
-    const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
+interface FileUploaderProps {
+    projectId: string;
+    onComplete?: () => void;
+}
 
-    const uploadFile = async (uFile: UploadingFile) => {
+export function FileUploader({ projectId, onComplete }: FileUploaderProps) {
+    const [uploadFiles, setUploadFiles] = useState<UploadFile[]>([]);
+
+    const uploadFile = async (uf: UploadFile) => {
+        setUploadFiles(prev => prev.map(f => f.id === uf.id ? { ...f, status: 'uploading' } : f));
+
         try {
+            // Get presigned URL
             const presignRes = await fetch('/api/uploads/presign', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
+                    filename: uf.file.name,
+                    contentType: uf.file.type,
                     projectId,
-                    filename: uFile.file.name,
-                    mimeType: uFile.file.type,
-                    size: uFile.file.size,
-                    folder,
                 }),
             });
+            if (!presignRes.ok) throw new Error('Could not get upload URL');
+            const { uploadUrl, key, fileId } = await presignRes.json();
 
-            if (!presignRes.ok) {
-                const err = await presignRes.json();
-                throw new Error(err.message || 'Presign failed');
-            }
-
-            const { uploadUrl, fileId } = await presignRes.json();
-
-            setUploadingFiles((prev) =>
-                prev.map((f) => (f.id === uFile.id ? { ...f, status: 'uploading' } : f))
-            );
-
+            // Upload to R2
+            const xhr = new XMLHttpRequest();
             await new Promise<void>((resolve, reject) => {
-                const xhr = new XMLHttpRequest();
-                xhr.open('PUT', uploadUrl);
-                xhr.setRequestHeader('Content-Type', uFile.file.type);
-
-                xhr.upload.onprogress = (event) => {
-                    if (event.lengthComputable) {
-                        const progress = (event.loaded / event.total) * 100;
-                        setUploadingFiles((prev) =>
-                            prev.map((f) => (f.id === uFile.id ? { ...f, progress } : f))
-                        );
+                xhr.upload.addEventListener('progress', (e) => {
+                    if (e.lengthComputable) {
+                        const progress = Math.round((e.loaded / e.total) * 90);
+                        setUploadFiles(prev => prev.map(f => f.id === uf.id ? { ...f, progress } : f));
                     }
-                };
-
-                xhr.onload = () => {
-                    if (xhr.status === 200) resolve();
-                    else reject(new Error('Upload failed'));
-                };
-
-                xhr.onerror = () => reject(new Error('Network error during upload'));
-                xhr.send(uFile.file);
+                });
+                xhr.addEventListener('load', () => xhr.status < 300 ? resolve() : reject(new Error(`Upload failed: ${xhr.status}`)));
+                xhr.addEventListener('error', () => reject(new Error('Upload failed')));
+                xhr.open('PUT', uploadUrl);
+                xhr.setRequestHeader('Content-Type', uf.file.type);
+                xhr.send(uf.file);
             });
 
-            setUploadingFiles((prev) =>
-                prev.map((f) => (f.id === uFile.id ? { ...f, status: 'confirming' } : f))
-            );
-
+            // Confirm upload
             const confirmRes = await fetch(`/api/projects/${projectId}/files/confirm`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ fileId }),
+                body: JSON.stringify({ fileId, key, name: uf.file.name, size: uf.file.size, mimeType: uf.file.type }),
             });
+            if (!confirmRes.ok) throw new Error('Could not confirm upload');
 
-            if (!confirmRes.ok) throw new Error('Confirmation failed');
-
-            setUploadingFiles((prev) =>
-                prev.map((f) => (f.id === uFile.id ? { ...f, status: 'completed', progress: 100 } : f))
-            );
-
-            toast.success(`${uFile.file.name} uploaded successfully`);
-            onComplete();
-
-            setTimeout(() => {
-                setUploadingFiles((prev) => prev.filter((f) => f.id !== uFile.id));
-            }, 3000);
-        } catch (error: unknown) {
-            console.error(error);
-            const message = error instanceof Error ? error.message : 'Upload failed';
-            setUploadingFiles((prev) =>
-                prev.map((f) => (f.id === uFile.id ? { ...f, status: 'error', error: message } : f))
-            );
-            toast.error(`Upload failed: ${uFile.file.name}`);
+            setUploadFiles(prev => prev.map(f => f.id === uf.id ? { ...f, status: 'done', progress: 100 } : f));
+            onComplete?.();
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : 'Upload failed';
+            setUploadFiles(prev => prev.map(f => f.id === uf.id ? { ...f, status: 'error', error: msg } : f));
         }
     };
 
-    const onDrop = useCallback(
-        (acceptedFiles: File[]) => {
-            const newFiles = acceptedFiles.map((file) => ({
-                id: Math.random().toString(36).substring(7),
-                file,
-                progress: 0,
-                status: 'pending' as const,
-            }));
-
-            setUploadingFiles((prev) => [...prev, ...newFiles]);
-            newFiles.forEach(uploadFile);
-        },
-        [projectId, folder]
-    );
+    const onDrop = useCallback((acceptedFiles: File[]) => {
+        const newFiles: UploadFile[] = acceptedFiles.map(file => ({
+            id: `${file.name}-${Date.now()}-${Math.random()}`,
+            file,
+            progress: 0,
+            status: 'pending',
+        }));
+        setUploadFiles(prev => [...prev, ...newFiles]);
+        newFiles.forEach(uf => void uploadFile(uf));
+    }, [projectId]);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
-        maxSize: 524288000,
+        maxSize: 500 * 1024 * 1024,
     });
 
+    const active = uploadFiles.filter(f => f.status !== 'done');
+
     return (
-        <div className="space-y-8 w-full">
+        <div className="space-y-6">
             <div
                 {...getRootProps()}
                 className={cn(
-                    "relative group h-64 border-2 border-dashed rounded-[2.5rem] transition-all duration-500 flex flex-col items-center justify-center cursor-pointer overflow-hidden",
-                    isDragActive
-                        ? "border-indigo-500 bg-indigo-500/10 scale-[0.98]"
-                        : "border-white/10 hover:border-indigo-500/40 hover:bg-white/[0.02]"
+                    'flex flex-col items-center gap-5 rounded-2xl border-2 border-dashed p-12 text-center cursor-pointer transition-all duration-300',
                 )}
+                style={{
+                    borderColor: isDragActive ? 'var(--accent)' : 'var(--border-medium)',
+                    background: isDragActive ? 'var(--accent-light)' : 'var(--surface-muted)',
+                }}
             >
                 <input {...getInputProps()} />
-
-                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-
-                <div className="relative z-10 flex flex-col items-center gap-6">
-                    <div className={cn(
-                        "h-20 w-20 rounded-3xl bg-white/5 flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:bg-indigo-500/10",
-                        isDragActive && "scale-110 bg-indigo-500/20"
-                    )}>
-                        <Upload size={36} className={cn(
-                            "text-white/20 transition-all duration-500 group-hover:text-indigo-400",
-                            isDragActive && "text-indigo-400 animate-bounce"
-                        )} />
-                    </div>
-                    <div className="text-center">
-                        <p className="text-xl font-black text-white tracking-tight">Drop your assets here</p>
-                        <p className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mt-2">
-                            Max size 500MB per file
-                        </p>
-                    </div>
+                <div
+                    className="h-16 w-16 rounded-2xl flex items-center justify-center transition-all duration-300"
+                    style={{
+                        background: isDragActive ? 'var(--accent)' : 'var(--surface)',
+                        color: isDragActive ? 'var(--primary-foreground)' : 'var(--text-muted)',
+                    }}
+                >
+                    <UploadCloud size={28} />
+                </div>
+                <div>
+                    <p className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>
+                        {isDragActive ? 'Drop files here' : 'Drop files or click to upload'}
+                    </p>
+                    <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
+                        Up to 500MB per file
+                    </p>
                 </div>
             </div>
 
-            <AnimatePresence>
-                {uploadingFiles.length > 0 && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        className="space-y-4"
-                    >
-                        <div className="flex items-center justify-between">
-                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30">Active Status</h4>
-                            <GlassBadge variant="indigo" className="px-3 h-5">{uploadingFiles.length} Queueing</GlassBadge>
-                        </div>
-                        <div className="space-y-3">
-                            {uploadingFiles.map((uf) => (
-                                <GlassCard key={uf.id} className="p-4 border-white/5 transition-all duration-500">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <div className="flex items-center gap-4 truncate">
-                                            <div className="h-10 w-10 rounded-xl bg-white/5 flex items-center justify-center shrink-0">
-                                                <FileIcon size={18} className="text-indigo-400" />
-                                            </div>
-                                            <div className="truncate">
-                                                <p className="text-sm font-black text-white truncate">{uf.file.name}</p>
-                                                <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">
-                                                    {uf.status === 'uploading' ? 'Transmitting...' : uf.status === 'confirming' ? 'Verifying...' : uf.status === 'completed' ? 'Finalized' : 'Error'}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div className="text-right">
-                                            {uf.status === 'completed' ? (
-                                                <div className="h-8 w-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-400">
-                                                    <CheckCircle2 size={18} />
-                                                </div>
-                                            ) : uf.status === 'error' ? (
-                                                <div className="h-8 w-8 rounded-full bg-red-500/10 flex items-center justify-center text-red-400">
-                                                    <X size={18} />
-                                                </div>
-                                            ) : (
-                                                <span className="text-xs font-black text-white">{Math.round(uf.progress)}%</span>
-                                            )}
-                                        </div>
+            {active.length > 0 && (
+                <div className="space-y-3">
+                    <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
+                        Uploading
+                    </p>
+                    {active.map((uf) => (
+                        <div
+                            key={uf.id}
+                            className="flex items-center gap-4 p-4 rounded-xl"
+                            style={{ background: 'var(--surface-muted)', border: '1px solid var(--border-subtle)' }}
+                        >
+                            <div
+                                className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0"
+                                style={{ background: 'var(--accent-light)', color: 'var(--accent)' }}
+                            >
+                                <FileIcon size={18} />
+                            </div>
+                            <div className="flex-1 min-w-0 space-y-2">
+                                <div className="flex items-center justify-between">
+                                    <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>
+                                        {uf.file.name}
+                                    </p>
+                                    <div className="flex items-center gap-2 shrink-0 ml-2">
+                                        {uf.status === 'uploading' && (
+                                            <>
+                                                <Loader2 size={14} className="animate-spin" style={{ color: 'var(--accent)' }} />
+                                                <span className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
+                                                    {uf.progress}%
+                                                </span>
+                                            </>
+                                        )}
+                                        {uf.status === 'done' && <CheckCircle2 size={16} style={{ color: 'var(--success)' }} />}
+                                        {uf.status === 'error' && <AlertCircle size={16} style={{ color: 'var(--destructive)' }} />}
                                     </div>
-
-                                    <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden border border-white/5">
-                                        <motion.div
-                                            initial={{ width: 0 }}
-                                            animate={{ width: `${uf.progress}%` }}
-                                            className={cn(
-                                                "h-full transition-all duration-300",
-                                                uf.status === 'error' ? "bg-red-500" : "bg-indigo-500"
-                                            )}
-                                        />
-                                    </div>
-
-                                    {uf.status === 'error' && (
-                                        <p className="text-[10px] text-red-400 font-bold mt-2 ml-1">Error: {uf.error}</p>
-                                    )}
-                                </GlassCard>
-                            ))}
+                                </div>
+                                <div className="flex items-center justify-between text-xs" style={{ color: 'var(--text-muted)' }}>
+                                    <span>{bytes(uf.file.size)}</span>
+                                    {uf.error && <span style={{ color: 'var(--destructive)' }}>{uf.error}</span>}
+                                </div>
+                                <div className="h-1.5 w-full rounded-full overflow-hidden" style={{ background: 'var(--surface)' }}>
+                                    <div
+                                        className="h-full rounded-full transition-all duration-300"
+                                        style={{
+                                            width: `${uf.progress}%`,
+                                            background: uf.status === 'error' ? 'var(--destructive)' : 'var(--accent-gradient)',
+                                        }}
+                                    />
+                                </div>
+                            </div>
                         </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }

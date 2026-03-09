@@ -158,9 +158,9 @@ export function MilestoneTracker({ projectId, initialMilestones, onUpdate }: Mil
                     <p className="text-sm font-bold text-[var(--text-muted)]">Organize and track your project deliverables</p>
                 </div>
                 {isReordering && (
-                    <div className="flex items-center gap-2 px-4 py-2 bg-indigo-500/10 rounded-xl border border-indigo-500/20">
-                        <Loader2 size={14} className="animate-spin text-indigo-400" />
-                        <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Syncing...</span>
+                    <div className="flex items-center gap-2 px-4 py-2 rounded-xl" style={{ background: 'var(--accent-light)', border: '1px solid var(--accent)', color: 'var(--accent)' }}>
+                        <Loader2 size={14} className="animate-spin" />
+                        <span className="text-[10px] font-black uppercase tracking-widest">Syncing...</span>
                     </div>
                 )}
             </div>
@@ -254,13 +254,14 @@ function SortableItem({
             <GlassCard
                 className={cn(
                     "flex items-center gap-6 p-4 transition-all duration-300",
-                    isDragging ? "ring-2 ring-[var(--accent)] shadow-[var(--glow-sm)] bg-[var(--accent-light)]" : "hover:border-white/10"
+                    isDragging ? "ring-2 ring-[var(--accent)] shadow-[var(--glow-sm)] bg-[var(--accent-light)]" : ""
                 )}
             >
                 <div
                     {...attributes}
                     {...listeners}
-                    className="cursor-grab active:cursor-grabbing text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors h-12 w-8 flex items-center justify-center bg-white/5 rounded-xl"
+                    className="cursor-grab active:cursor-grabbing transition-colors h-12 w-8 flex items-center justify-center rounded-xl"
+                    style={{ color: 'var(--text-muted)', background: 'var(--surface-muted)' }}
                 >
                     <GripVertical size={20} />
                 </div>
@@ -279,14 +280,14 @@ function SortableItem({
                         defaultValue={milestone.status}
                         onValueChange={(val) => onUpdate(milestone._id, { status: val as Milestone['status'] })}
                     >
-                        <SelectTrigger className="h-10 border-none bg-white/5 hover:bg-white/10 px-4 rounded-xl min-w-[140px] font-bold text-xs ring-0 focus:ring-0">
+                        <SelectTrigger className="h-10 border-none px-4 rounded-xl min-w-[140px] font-bold text-xs ring-0 focus:ring-0" style={{ background: 'var(--surface-muted)', color: 'var(--text-primary)' }}>
                             <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="glass-card border-white/10 rounded-2xl p-2 shadow-2xl">
-                            <SelectItem value="not_started" className="rounded-xl focus:bg-indigo-600/10 font-bold">Not Started</SelectItem>
-                            <SelectItem value="in_progress" className="rounded-xl focus:bg-indigo-600/10 font-bold">In Progress</SelectItem>
-                            <SelectItem value="in_review" className="rounded-xl focus:bg-indigo-600/10 font-bold">In Review</SelectItem>
-                            <SelectItem value="complete" className="rounded-xl focus:bg-indigo-600/10 font-bold">Complete</SelectItem>
+                        <SelectContent className="glass-card rounded-xl p-1.5 shadow-xl" style={{ borderColor: 'var(--border-medium)' }}>
+                            <SelectItem value="not_started" className="rounded-lg font-medium text-sm">Not Started</SelectItem>
+                            <SelectItem value="in_progress" className="rounded-lg font-medium text-sm">In Progress</SelectItem>
+                            <SelectItem value="in_review" className="rounded-lg font-medium text-sm">In Review</SelectItem>
+                            <SelectItem value="complete" className="rounded-lg font-medium text-sm">Complete</SelectItem>
                         </SelectContent>
                     </Select>
 

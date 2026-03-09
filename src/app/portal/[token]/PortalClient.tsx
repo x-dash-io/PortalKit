@@ -70,7 +70,7 @@ export function PortalClient({ token, project }: { token: string; project: Proje
   }
 
   return (
-    <PortalLayout freelancerName={data.freelancerName} projectTitle={project.title} theme={data.theme}>
+    <PortalLayout freelancerName={data.freelancerName} projectTitle={project.title} theme={data.theme} freelancerLogo={data.freelancerLogo}>
       <div className="space-y-12">
         <PortalOverview project={data.project} />
 

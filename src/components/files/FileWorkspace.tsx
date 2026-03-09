@@ -18,27 +18,36 @@ export function FileWorkspace({ projectId }: FileWorkspaceProps) {
     const [refreshKey, setRefreshKey] = useState(0);
     const [selectedFile, setSelectedFile] = useState<FileRecord | null>(null);
 
-    const handleUploadComplete = () => {
-        setRefreshKey(prev => prev + 1);
-    };
+    const handleUploadComplete = () => setRefreshKey(prev => prev + 1);
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div className="space-y-1">
-                    <h3 className="text-2xl font-black text-white tracking-tight">File Hub</h3>
-                    <p className="text-sm font-bold text-[var(--text-muted)]">Manage and share project assets securely</p>
+                    <h3 className="text-2xl font-black tracking-tight" style={{ color: 'var(--text-primary)' }}>File Hub</h3>
+                    <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Manage and share project assets securely</p>
                 </div>
             </div>
 
             <Tabs defaultValue="grid" className="space-y-6">
-                <TabsList className="bg-white/5 border border-white/5 p-1 rounded-xl h-12 inline-flex shadow-xl backdrop-blur-md">
-                    <TabsTrigger value="grid" className="rounded-lg px-6 data-[state=active]:bg-white/10 data-[state=active]:text-white h-full gap-2 transition-all font-bold text-[10px] uppercase tracking-widest">
-                        <LayoutGrid size={14} />
+                <TabsList
+                    className="p-1 rounded-xl h-11 inline-flex"
+                    style={{ background: 'var(--surface-muted)', border: '1px solid var(--border-subtle)' }}
+                >
+                    <TabsTrigger
+                        value="grid"
+                        className="rounded-lg px-5 h-full gap-2 transition-all text-[10px] font-bold uppercase tracking-widest data-[state=active]:shadow-sm"
+                        style={{ color: 'var(--text-muted)' }}
+                    >
+                        <LayoutGrid size={13} />
                         Grid View
                     </TabsTrigger>
-                    <TabsTrigger value="upload" className="rounded-lg px-6 data-[state=active]:bg-white/10 data-[state=active]:text-white h-full gap-2 transition-all font-bold text-[10px] uppercase tracking-widest">
-                        <UploadCloud size={14} />
+                    <TabsTrigger
+                        value="upload"
+                        className="rounded-lg px-5 h-full gap-2 transition-all text-[10px] font-bold uppercase tracking-widest data-[state=active]:shadow-sm"
+                        style={{ color: 'var(--text-muted)' }}
+                    >
+                        <UploadCloud size={13} />
                         Upload
                     </TabsTrigger>
                 </TabsList>

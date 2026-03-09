@@ -8,6 +8,8 @@ import { serializeProjectDetail, serializeProjectSummary } from '@/lib/serialize
 import * as z from 'zod';
 import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
+import { sendEmail } from '@/lib/email';
+import { PortalAccessEmail } from '@/emails/portal-access';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -63,6 +65,15 @@ export async function POST(req: Request) {
             portalTokenPrefix: tokenPrefix,
             status: 'active',
         })).toObject();
+
+        // Send portal access email to client
+        const portalUrl = `${process.env.NEXTAUTH_URL}/portal/${tokenPrefix}`;
+        void sendEmail(
+            validated.clientEmail,
+            `Your project portal is ready — ${validated.title}`,
+            PortalAccessEmail,
+            { projectTitle: validated.title, portalUrl }
+        );
 
         return NextResponse.json({ project: serializeProjectDetail(project), token }, { status: 201 });
     } catch (error: unknown) {

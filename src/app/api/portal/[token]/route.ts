@@ -39,7 +39,7 @@ export async function GET(
                 .select('-__v')
                 .sort({ createdAt: -1 })
                 .lean(),
-            User.findById(project.freelancerId).select('name theme').lean(),
+            User.findById(project.freelancerId).select('name theme logo avatar').lean(),
             getProjectCounts([String(project._id)]),
         ]);
 
@@ -47,6 +47,7 @@ export async function GET(
             serializePortalPayload({
                 theme: freelancer?.theme,
                 freelancerName: freelancer?.name,
+                freelancerLogo: (freelancer as { logo?: string } | null)?.logo,
                 project,
                 approvals,
                 invoices,

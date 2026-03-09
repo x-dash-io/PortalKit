@@ -9,9 +9,10 @@ interface PortalLayoutProps {
   freelancerName: string;
   projectTitle: string;
   theme?: string;
+  freelancerLogo?: string;
 }
 
-export function PortalLayout({ children, freelancerName, projectTitle, theme = 'frost' }: PortalLayoutProps) {
+export function PortalLayout({ children, freelancerName, projectTitle, theme = 'frost', freelancerLogo }: PortalLayoutProps) {
   return (
     <div className={cn('min-h-screen', theme)} data-theme={theme}>
       {/* Ambient */}
@@ -38,12 +39,22 @@ export function PortalLayout({ children, freelancerName, projectTitle, theme = '
       >
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-4 px-5">
           <div className="flex items-center gap-3">
-            <div
-              className="flex h-8 w-8 items-center justify-center rounded-xl text-white"
-              style={{ background: 'var(--accent-gradient)', boxShadow: 'var(--glow-sm)' }}
-            >
-              <Zap size={14} strokeWidth={2.5} />
-            </div>
+            {freelancerLogo ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={freelancerLogo}
+                alt={freelancerName}
+                className="h-8 w-8 rounded-xl object-contain"
+                style={{ border: '1px solid var(--border-subtle)' }}
+              />
+            ) : (
+              <div
+                className="flex h-8 w-8 items-center justify-center rounded-xl"
+                style={{ background: 'var(--accent-gradient)', boxShadow: 'var(--glow-sm)', color: 'var(--primary-foreground)' }}
+              >
+                <Zap size={14} strokeWidth={2.5} />
+              </div>
+            )}
             <div>
               <h1 className="text-sm font-bold leading-tight" style={{ color: 'var(--text-primary)' }}>
                 {projectTitle}

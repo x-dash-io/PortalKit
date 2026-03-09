@@ -14,6 +14,7 @@ import {
   DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useState, useRef, useCallback } from 'react';
+import { CommandPalette } from '@/components/dashboard/CommandPalette';
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { sidebarOpen } = useUIStore();
@@ -41,11 +42,14 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     if (pathname.startsWith('/dashboard/projects')) router.push('/dashboard/projects');
   }, [pathname, router]);
 
+  const [cmdOpen, setCmdOpen] = useState(false);
+
   const initials = session?.user?.name
     ?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() ?? 'U';
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--canvas)' }}>
+      <CommandPalette onNewProject={() => router.push('/dashboard/projects')} />
       <GlassNav />
 
       <div

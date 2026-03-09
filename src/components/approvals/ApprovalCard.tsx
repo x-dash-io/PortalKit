@@ -2,14 +2,8 @@
 
 import React, { useState } from 'react';
 import {
-    CheckCircle2,
-    AlertCircle,
-    Clock,
-    FileIcon,
-    ChevronDown,
-    Check,
-    RotateCcw,
-    Loader2
+    CheckCircle2, AlertCircle, Clock, FileIcon,
+    ChevronDown, Check, RotateCcw, Loader2,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { CommentThread } from './CommentThread';
@@ -17,8 +11,6 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { ApprovalRecord } from '@/lib/contracts';
-
-// Glass Components
 import { GlassCard } from '@/components/glass/GlassCard';
 import { GlassBadge } from '@/components/glass/GlassBadge';
 import { GlassButton } from '@/components/glass/GlassButton';
@@ -46,13 +38,13 @@ export function ApprovalCard({ approval, projectId, view, onRefresh, portalToken
             const res = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status })
+                body: JSON.stringify({ status }),
             });
 
-            if (!res.ok) throw new Error('Response failed');
+            if (!res.ok) throw new Error();
             toast.success(status === 'approved' ? 'Approved!' : 'Changes requested');
             onRefresh();
-        } catch (error) {
+        } catch {
             toast.error('Could not submit response');
         } finally {
             setResponseLoading(null);
@@ -62,7 +54,7 @@ export function ApprovalCard({ approval, projectId, view, onRefresh, portalToken
     const statusConfig = {
         pending: { label: 'Pending Review', variant: 'amber' as const, icon: Clock },
         approved: { label: 'Approved', variant: 'emerald' as const, icon: CheckCircle2 },
-        changes_requested: { label: 'Changes Requested', variant: 'red' as const, icon: AlertCircle }
+        changes_requested: { label: 'Changes Requested', variant: 'red' as const, icon: AlertCircle },
     };
 
     const config = statusConfig[approval.status as keyof typeof statusConfig] || statusConfig.pending;
@@ -70,43 +62,47 @@ export function ApprovalCard({ approval, projectId, view, onRefresh, portalToken
     return (
         <GlassCard
             className={cn(
-                "p-0 transition-all duration-500 overflow-hidden border-white/5",
-                isExpanded ? "ring-2 ring-indigo-500/20" : "hover:border-white/10"
+                'p-0 transition-all duration-300 overflow-hidden',
+                isExpanded && 'ring-2 ring-[var(--accent)]/20'
             )}
         >
             <div
-                className="p-6 flex items-center justify-between cursor-pointer group"
+                className="p-5 flex items-center justify-between cursor-pointer group"
                 onClick={() => setIsExpanded(!isExpanded)}
             >
-                <div className="flex items-center gap-6">
-                    <div className={cn(
-                        "h-14 w-14 rounded-2xl flex items-center justify-center transition-all duration-500 bg-white/5",
-                        isExpanded ? "scale-110 bg-indigo-500/10 text-indigo-400" : "group-hover:bg-white/10"
-                    )}>
-                        <config.icon size={28} />
+                <div className="flex items-center gap-4">
+                    <div
+                        className="h-12 w-12 rounded-xl flex items-center justify-center transition-all duration-300"
+                        style={{
+                            background: isExpanded ? 'var(--accent-light)' : 'var(--surface-muted)',
+                            color: isExpanded ? 'var(--accent)' : 'var(--text-muted)',
+                        }}
+                    >
+                        <config.icon size={22} />
                     </div>
                     <div>
-                        <h4 className="font-black text-xl text-white tracking-tight">{approval.title}</h4>
-                        <div className="flex items-center gap-4 mt-1.5">
-                            <GlassBadge variant="slate" className="text-[10px] bg-white/5">
-                                {approval.type}
-                            </GlassBadge>
-                            <span className="text-[10px] uppercase font-black tracking-widest text-[var(--text-muted)]">
+                        <h4 className="font-bold text-base tracking-tight" style={{ color: 'var(--text-primary)' }}>
+                            {approval.title}
+                        </h4>
+                        <div className="flex items-center gap-3 mt-1">
+                            <GlassBadge variant="slate" className="text-[9px]">{approval.type}</GlassBadge>
+                            <span className="text-[10px] uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
                                 {format(new Date(approval.createdAt), 'MMM dd')}
                             </span>
                         </div>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-6">
-                    <GlassBadge variant={config.variant} className="px-4 py-1.5">
-                        {config.label}
-                    </GlassBadge>
-                    <div className={cn(
-                        "text-[var(--text-muted)] p-2 rounded-xl transition-transform duration-500",
-                        isExpanded ? "rotate-180 bg-white/5 text-white" : "group-hover:text-white"
-                    )}>
-                        <ChevronDown size={22} />
+                <div className="flex items-center gap-4">
+                    <GlassBadge variant={config.variant}>{config.label}</GlassBadge>
+                    <div
+                        className="p-1.5 rounded-lg transition-all duration-300"
+                        style={{
+                            color: 'var(--text-muted)',
+                            transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                        }}
+                    >
+                        <ChevronDown size={18} />
                     </div>
                 </div>
             </div>
@@ -117,67 +113,84 @@ export function ApprovalCard({ approval, projectId, view, onRefresh, portalToken
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
+                        transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
                     >
-                        <div className="px-8 pb-8 pt-6 border-t border-white/5">
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                                <div className="space-y-8">
+                        <div className="px-6 pb-6 pt-4" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                <div className="space-y-6">
                                     {approval.description && (
-                                        <div className="space-y-3">
-                                            <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Context & Requirements</label>
-                                            <p className="text-base leading-relaxed text-[var(--text-secondary)] font-medium">{approval.description}</p>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
+                                                Context & Requirements
+                                            </label>
+                                            <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                                                {approval.description}
+                                            </p>
                                         </div>
                                     )}
 
                                     {approval.file && (
-                                        <div className="space-y-3">
-                                            <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Attached Artifact</label>
-                                            <div className="flex items-center justify-between p-4 glass-card bg-white/[0.02] border-white/5 rounded-2xl group/file">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="h-10 w-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400">
-                                                        <FileIcon size={20} />
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
+                                                Attached File
+                                            </label>
+                                            <div
+                                                className="flex items-center justify-between p-4 rounded-xl"
+                                                style={{ background: 'var(--surface-muted)', border: '1px solid var(--border-subtle)' }}
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <div
+                                                        className="h-9 w-9 rounded-lg flex items-center justify-center"
+                                                        style={{ background: 'var(--accent-light)', color: 'var(--accent)' }}
+                                                    >
+                                                        <FileIcon size={16} />
                                                     </div>
-                                                    <span className="text-sm font-bold text-white">
+                                                    <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                                                         {approval.file.originalName}
                                                     </span>
                                                 </div>
-                                                <GlassButton variant="ghost" size="sm" className="rounded-xl h-9">
-                                                    View Asset
+                                                <GlassButton variant="ghost" size="sm" className="rounded-lg h-8 text-xs">
+                                                    View
                                                 </GlassButton>
                                             </div>
                                         </div>
                                     )}
 
                                     {view === 'client' && approval.status === 'pending' && (
-                                        <div className="flex gap-4 pt-4">
-                                            <GlassButton
-                                                onClick={() => handleResponse('approved')}
+                                        <div className="flex gap-3 pt-2">
+                                            <button
+                                                onClick={() => void handleResponse('approved')}
                                                 disabled={!!responseLoading}
-                                                className="flex-1 rounded-2xl h-14"
+                                                className="flex-1 flex items-center justify-center gap-2 h-11 rounded-xl font-semibold text-sm transition-all disabled:opacity-60"
+                                                style={{ background: 'var(--success-bg)', color: 'var(--success)', border: '1px solid var(--success)' }}
                                             >
-                                                {responseLoading === 'approved' ? <Loader2 className="animate-spin" /> : <><Check size={20} className="mr-2" /> Approve Design</>}
-                                            </GlassButton>
-                                            <GlassButton
-                                                variant="secondary"
-                                                onClick={() => handleResponse('changes_requested')}
+                                                {responseLoading === 'approved'
+                                                    ? <Loader2 size={16} className="animate-spin" />
+                                                    : <><Check size={16} /> Approve</>}
+                                            </button>
+                                            <button
+                                                onClick={() => void handleResponse('changes_requested')}
                                                 disabled={!!responseLoading}
-                                                className="flex-1 rounded-2xl h-14 border-red-500/20 text-red-500 hover:bg-red-500/10"
+                                                className="flex-1 flex items-center justify-center gap-2 h-11 rounded-xl font-semibold text-sm transition-all disabled:opacity-60"
+                                                style={{ background: 'var(--warning-bg)', color: 'var(--warning)', border: '1px solid var(--warning)' }}
                                             >
-                                                {responseLoading === 'changes_requested' ? <Loader2 className="animate-spin" /> : <><RotateCcw size={20} className="mr-2" /> Request Revision</>}
-                                            </GlassButton>
+                                                {responseLoading === 'changes_requested'
+                                                    ? <Loader2 size={16} className="animate-spin" />
+                                                    : <><RotateCcw size={16} /> Request Changes</>}
+                                            </button>
                                         </div>
                                     )}
 
                                     {view === 'freelancer' && approval.status === 'changes_requested' && (
-                                        <div className="pt-4">
-                                            <GlassButton className="w-full rounded-2xl h-14">
-                                                <RotateCcw size={20} className="mr-2" /> Submit Revisions
+                                        <div className="pt-2">
+                                            <GlassButton className="w-full h-11 rounded-xl gap-2">
+                                                <RotateCcw size={16} /> Submit Revisions
                                             </GlassButton>
                                         </div>
                                     )}
                                 </div>
 
-                                <div className="lg:border-l lg:border-white/5 lg:pl-12">
+                                <div className="pt-6 lg:pt-0 lg:border-t-0 lg:border-l lg:pl-8" style={{ borderColor: 'var(--border-subtle)' }}>
                                     <CommentThread
                                         approvalId={approval._id}
                                         projectId={projectId}

@@ -18,6 +18,7 @@ import type { FileListResponse, FileRecord } from '@/lib/contracts';
 import { GlassModal } from '@/components/glass/GlassModal';
 import { GlassInput } from '@/components/glass/GlassInput';
 import { GlassButton } from '@/components/glass/GlassButton';
+import { toast } from 'sonner';
 
 const approvalSchema = z.object({
     title: z.string().min(1, 'Title is required'),

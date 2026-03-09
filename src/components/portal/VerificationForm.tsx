@@ -43,14 +43,17 @@ export function VerificationForm({ token }: VerificationFormProps) {
     return (
         <div className="w-full max-w-md mx-auto space-y-8 animate-in fade-in zoom-in duration-500">
             <div className="text-center space-y-4">
-                <div className="h-20 w-20 bg-indigo-600 rounded-3xl mx-auto flex items-center justify-center text-white shadow-2xl shadow-indigo-500/20 mb-8">
+                <div
+                    className="h-20 w-20 rounded-3xl mx-auto flex items-center justify-center mb-8"
+                    style={{ background: 'var(--accent)', color: 'var(--primary-foreground)', boxShadow: 'var(--glow)' }}
+                >
                     <ShieldCheck size={40} />
                 </div>
-                <h1 className="text-4xl font-black tracking-tight text-white">Secure Access</h1>
-                <p className="text-[var(--text-muted)]">Please verify your email address to access this project portal.</p>
+                <h1 className="text-4xl font-black tracking-tight" style={{ color: 'var(--text-primary)' }}>Secure Access</h1>
+                <p style={{ color: 'var(--text-muted)' }}>Please verify your email address to access this project portal.</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="glass-card p-8 space-y-6 border-white/5">
+            <form onSubmit={handleSubmit} className="glass-card p-8 space-y-6" style={{ borderColor: 'var(--border-medium)' }}>
                 <div className="space-y-3">
                     <label className="text-xs font-black uppercase tracking-widest text-[var(--text-muted)]">Email Address</label>
                     <div className="relative">
@@ -69,7 +72,8 @@ export function VerificationForm({ token }: VerificationFormProps) {
                 <Button
                     type="submit"
                     disabled={loading}
-                    className="w-full h-14 bg-indigo-600 hover:bg-indigo-700 rounded-2xl font-black text-lg gap-2 shadow-xl shadow-indigo-500/20 transition-all active:scale-95"
+                    className="w-full h-14 rounded-2xl font-black text-lg gap-2 transition-all active:scale-95"
+                    style={{ background: 'var(--accent)', color: 'var(--primary-foreground)', boxShadow: 'var(--glow-sm)' }}
                 >
                     {loading ? 'Verifying...' : 'Access Portal'}
                     <ArrowRight size={20} />

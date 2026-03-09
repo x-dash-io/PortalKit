@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  FolderKanban, LayoutDashboard, PanelLeftClose,
+  Bell, FolderKanban, LayoutDashboard, PanelLeftClose,
   PanelLeftOpen, Settings, Zap,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -12,9 +12,10 @@ import { useUIStore } from '@/lib/store';
 import { ThemeSwitcher } from '@/components/themes/ThemeSwitcher';
 
 const navItems = [
-  { name: 'Dashboard', href: '/dashboard',          icon: LayoutDashboard, exact: true },
-  { name: 'Projects',  href: '/dashboard/projects', icon: FolderKanban,    exact: false },
-  { name: 'Settings',  href: '/dashboard/settings', icon: Settings,        exact: false },
+  { name: 'Dashboard',     href: '/dashboard',               icon: LayoutDashboard, exact: true },
+  { name: 'Projects',      href: '/dashboard/projects',      icon: FolderKanban,    exact: false },
+  { name: 'Notifications', href: '/dashboard/notifications', icon: Bell,            exact: false },
+  { name: 'Settings',      href: '/dashboard/settings',      icon: Settings,        exact: false },
 ];
 
 export function GlassNav() {
@@ -40,8 +41,8 @@ export function GlassNav() {
         <div className="flex h-[60px] items-center gap-3 px-4 shrink-0">
           <Link href="/dashboard" className="flex items-center gap-3 min-w-0 flex-1">
             <div
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-white"
-              style={{ background: 'var(--accent-gradient)', boxShadow: 'var(--glow-sm)', flexShrink: 0 }}
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl"
+              style={{ background: 'var(--accent-gradient)', boxShadow: 'var(--glow-sm)', flexShrink: 0, color: 'var(--primary-foreground)' }}
             >
               <Zap size={15} strokeWidth={2.5} />
             </div>

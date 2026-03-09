@@ -10,6 +10,45 @@ import { deleteObject } from '@/lib/r2';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+export async function PATCH(
+    req: Request,
+    { params }: { params: Promise<{ id: string; fid: string }> }
+) {
+    try {
+        const { id: projectId, fid: fileId } = await params;
+        const session = await getServerSession(authOptions);
+        if (!session) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+
+        const body = await req.json();
+        const { name, folder } = body as { name?: string; folder?: string };
+
+        await connectDB();
+
+        const project = await Project.findOne({ _id: projectId, freelancerId: session.user.id });
+        if (!project) return NextResponse.json({ message: 'Project not found' }, { status: 404 });
+
+        const updates: Record<string, string> = {};
+        if (name?.trim()) {
+            updates.name = name.trim();
+            updates.originalName = name.trim();
+        }
+        if (folder !== undefined) updates.folder = folder.trim();
+
+        const file = await File.findOneAndUpdate(
+            { _id: fileId, projectId },
+            { $set: updates },
+            { new: true }
+        ).lean();
+
+        if (!file) return NextResponse.json({ message: 'File not found' }, { status: 404 });
+
+        return NextResponse.json({ message: 'File updated', file });
+    } catch (error) {
+        console.error('Patch error:', error);
+        return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+    }
+}
+
 export async function DELETE(
     req: Request,
     { params }: { params: Promise<{ id: string; fid: string }> }

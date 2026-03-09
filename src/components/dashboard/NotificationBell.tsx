@@ -66,8 +66,8 @@ export function NotificationBell() {
           <Bell size={16} />
           {unreadCount > 0 && (
             <span
-              className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-black text-white"
-              style={{ background: 'var(--destructive)', boxShadow: '0 0 0 2px var(--canvas)' }}
+              className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-black"
+              style={{ background: 'var(--destructive)', boxShadow: '0 0 0 2px var(--canvas)', color: '#fff' }}
             >
               {unreadCount > 9 ? '9+' : unreadCount}
             </span>
@@ -185,16 +185,23 @@ export function NotificationBell() {
         {/* Footer */}
         {notifications.length > 0 && (
           <div
-            className="flex items-center justify-center px-4 py-2.5"
+            className="flex items-center justify-between px-4 py-2.5"
             style={{ borderTop: '1px solid var(--border-subtle)' }}
           >
+            <button
+              onClick={() => { router.push('/dashboard/notifications'); setIsOpen(false); }}
+              className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest transition-colors hover:text-[var(--accent)]"
+              style={{ color: 'var(--text-muted)' }}
+            >
+              View all notifications
+            </button>
             <button
               onClick={() => { router.push('/dashboard/settings'); setIsOpen(false); }}
               className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest transition-colors hover:text-[var(--accent)]"
               style={{ color: 'var(--text-muted)' }}
             >
               <Settings size={11} />
-              Notification settings
+              Settings
             </button>
           </div>
         )}

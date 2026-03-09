@@ -116,10 +116,10 @@ export function FilePreview({ file, projectId, onClose, onVersionUploaded }: Fil
 
     return (
         <Dialog open={!!file} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="glass-card max-w-4xl w-[90vw] h-[80vh] flex flex-col p-0 border-white/10 backdrop-blur-3xl overflow-hidden">
-                <DialogHeader className="p-6 border-b border-white/5 flex flex-row items-center justify-between shrink-0">
+            <DialogContent className="glass-card max-w-4xl w-[90vw] h-[80vh] flex flex-col p-0 backdrop-blur-xl overflow-hidden" style={{ borderColor: 'var(--border-medium)' }}>
+                <DialogHeader className="p-6 flex flex-row items-center justify-between shrink-0" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                     <div>
-                        <DialogTitle className="text-xl font-bold truncate max-w-md">{file.name}</DialogTitle>
+                        <DialogTitle className="text-xl font-bold truncate max-w-md" style={{ color: 'var(--text-primary)' }}>{file.name}</DialogTitle>
                         <p className="text-xs text-[var(--text-muted)] mt-1">
                             {file.mimeType} • {bytes(file.size)}
                         </p>
@@ -128,7 +128,7 @@ export function FilePreview({ file, projectId, onClose, onVersionUploaded }: Fil
                         <Button
                             variant="ghost"
                             size="sm"
-                            className="gap-2 hover:bg-white/10"
+                            className="gap-2"
                             onClick={() => downloadUrl && window.open(downloadUrl, '_blank')}
                         >
                             <Download size={16} />
@@ -143,7 +143,7 @@ export function FilePreview({ file, projectId, onClose, onVersionUploaded }: Fil
                         <Button
                             variant="ghost"
                             size="sm"
-                            className="gap-2 hover:bg-white/10"
+                            className="gap-2"
                             disabled={uploadingVersion}
                             onClick={() => inputRef.current?.click()}
                         >
@@ -153,10 +153,10 @@ export function FilePreview({ file, projectId, onClose, onVersionUploaded }: Fil
                     </div>
                 </DialogHeader>
 
-                <div className="flex-1 overflow-auto bg-black/20 flex items-center justify-center p-4">
+                <div className="flex-1 overflow-auto flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.15)' }}>
                     {loading ? (
                         <div className="flex flex-col items-center gap-3">
-                            <Loader2 className="animate-spin text-indigo-400" size={32} />
+                            <Loader2 className="animate-spin" size={32} style={{ color: 'var(--accent)' }} />
                             <p className="text-sm text-[var(--text-muted)]">Loading preview...</p>
                         </div>
                     ) : downloadUrl ? (
@@ -184,16 +184,16 @@ export function FilePreview({ file, projectId, onClose, onVersionUploaded }: Fil
                                 />
                             )}
                             {!isImage && !isPDF && !isVideo && (
-                                <div className="text-center p-12 bg-white/5 rounded-3xl border border-white/5 max-w-sm">
-                                    <div className="bg-white/5 p-6 rounded-full w-fit mx-auto mb-4">
-                                        <FileQuestion size={48} className="text-[var(--text-muted)]" />
+                                <div className="text-center p-10 rounded-2xl max-w-sm" style={{ background: 'var(--surface-muted)', border: '1px solid var(--border-subtle)' }}>
+                                    <div className="p-4 rounded-2xl w-fit mx-auto mb-4" style={{ background: 'var(--surface)' }}>
+                                        <FileQuestion size={40} style={{ color: 'var(--text-muted)' }} />
                                     </div>
-                                    <h3 className="text-lg font-bold mb-2">Preview unavailable</h3>
-                                    <p className="text-sm text-[var(--text-secondary)] mb-6">
+                                    <h3 className="text-base font-bold mb-2" style={{ color: 'var(--text-primary)' }}>Preview unavailable</h3>
+                                    <p className="text-sm mb-5" style={{ color: 'var(--text-secondary)' }}>
                                         We don&apos;t support in-browser preview for this file type yet.
                                     </p>
                                     <Button
-                                        className="bg-indigo-600 hover:bg-indigo-700 w-full"
+                                        className="w-full"
                                         onClick={() => window.open(downloadUrl, '_blank')}
                                     >
                                         Download File
@@ -204,7 +204,7 @@ export function FilePreview({ file, projectId, onClose, onVersionUploaded }: Fil
                     ) : null}
                 </div>
 
-                <div className="border-t border-white/5 px-6 py-4 text-xs text-[var(--text-muted)]">
+                <div className="px-6 py-3 text-xs" style={{ borderTop: '1px solid var(--border-subtle)', color: 'var(--text-muted)' }}>
                     {file.versions.length > 0 ? `${file.versions.length} archived version(s) available on this asset.` : 'No prior versions yet.'}
                 </div>
             </DialogContent>

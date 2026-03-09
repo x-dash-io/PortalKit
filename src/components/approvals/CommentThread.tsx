@@ -1,14 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { formatDistanceToNow } from 'date-fns';
-import { Send, Loader2, Smile } from 'lucide-react';
+import { Send, Loader2, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import type { ApprovalCommentRecord } from '@/lib/contracts';
-
 import { GlassBadge } from '@/components/glass/GlassBadge';
-import { GlassButton } from '@/components/glass/GlassButton';
 
 interface CommentThreadProps {
     approvalId: string;
@@ -22,6 +20,13 @@ export function CommentThread({ approvalId, projectId, initialComments, currentU
     const [comments, setComments] = useState<ApprovalCommentRecord[]>(initialComments);
     const [newComment, setNewComment] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const scrollRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (scrollRef.current) {
+            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+    }, [comments]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -40,96 +45,110 @@ export function CommentThread({ approvalId, projectId, initialComments, currentU
                 body: JSON.stringify({ text: newComment }),
             });
 
-            if (!res.ok) throw new Error('Failed to post comment');
+            if (!res.ok) throw new Error();
             const data = await res.json();
-
-            setComments([...comments, data]);
+            setComments(prev => [...prev, data]);
             setNewComment('');
-            toast.success('Response recorded');
-        } catch (error) {
-            toast.error('Could not transmit message');
+        } catch {
+            toast.error('Could not send message');
         } finally {
             setIsSubmitting(false);
         }
     };
 
     return (
-        <div className="flex flex-col h-full space-y-8">
+        <div className="flex flex-col h-full space-y-4">
             <div className="flex items-center justify-between">
-                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30">Discussion Thread</h4>
-                <GlassBadge variant="slate" className="px-3">{comments.length} Messages</GlassBadge>
+                <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
+                    Discussion
+                </p>
+                <GlassBadge variant="slate" className="px-2 py-0.5 text-[9px]">
+                    {comments.length} {comments.length === 1 ? 'message' : 'messages'}
+                </GlassBadge>
             </div>
 
-            <div className="flex-1 space-y-6 max-h-[500px] overflow-y-auto pr-4 scrollbar-thin scrollbar-thumb-white/5 scrollbar-track-transparent">
+            <div
+                ref={scrollRef}
+                className="flex-1 space-y-3 max-h-72 overflow-y-auto pr-1"
+            >
                 {comments.length === 0 ? (
-                    <div className="text-center py-20 bg-white/[0.02] border border-dashed border-white/5 rounded-[2rem]">
-                        <Smile className="mx-auto text-white/10 mb-4" size={32} />
-                        <p className="text-xs font-black uppercase tracking-widest text-white/20">
-                            No feedback yet.
-                        </p>
+                    <div
+                        className="flex flex-col items-center justify-center py-10 rounded-xl text-center"
+                        style={{ background: 'var(--surface-muted)', border: '1px dashed var(--border-medium)' }}
+                    >
+                        <MessageSquare size={24} style={{ color: 'var(--text-muted)' }} className="mb-2" />
+                        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>No messages yet</p>
                     </div>
                 ) : (
-                    comments.map((comment) => (
-                        <div
-                            key={comment._id ?? `${comment.author}-${comment.createdAt}`}
-                            className={cn(
-                                "flex flex-col gap-2 max-w-[90%] transition-all duration-500",
-                                comment.author === currentUserType ? "ml-auto items-end" : "items-start"
-                            )}
-                        >
-                            <div className="flex items-center gap-3 mb-1">
-                                <span className={cn(
-                                    "text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest",
-                                    comment.author === 'freelancer'
-                                        ? "bg-indigo-500/10 text-indigo-400"
-                                        : "bg-emerald-500/10 text-emerald-400"
-                                )}>
-                                    {comment.author}
-                                </span>
-                                <span className="text-[9px] font-bold text-white/20 uppercase tracking-tighter">
-                                    {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
-                                </span>
+                    comments.map((comment) => {
+                        const isOwn = comment.author === currentUserType;
+                        return (
+                            <div
+                                key={comment._id ?? `${comment.author}-${comment.createdAt}`}
+                                className={cn('flex flex-col gap-1 max-w-[88%]', isOwn ? 'ml-auto items-end' : 'items-start')}
+                            >
+                                <div className="flex items-center gap-2">
+                                    <span
+                                        className="text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-widest"
+                                        style={{
+                                            background: comment.author === 'freelancer' ? 'var(--accent-light)' : 'var(--success-bg)',
+                                            color: comment.author === 'freelancer' ? 'var(--accent)' : 'var(--success)',
+                                        }}
+                                    >
+                                        {comment.author}
+                                    </span>
+                                    <span className="text-[9px]" style={{ color: 'var(--text-muted)' }}>
+                                        {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
+                                    </span>
+                                </div>
+                                <div
+                                    className="px-4 py-2.5 rounded-xl text-sm leading-relaxed"
+                                    style={isOwn ? {
+                                        background: 'var(--accent)',
+                                        color: 'var(--primary-foreground)',
+                                        borderRadius: '12px 12px 2px 12px',
+                                    } : {
+                                        background: 'var(--surface-muted)',
+                                        color: 'var(--text-primary)',
+                                        border: '1px solid var(--border-subtle)',
+                                        borderRadius: '12px 12px 12px 2px',
+                                    }}
+                                >
+                                    {comment.text}
+                                </div>
                             </div>
-                            <div className={cn(
-                                "px-5 py-3.5 rounded-2xl text-sm font-medium leading-relaxed transition-all duration-500",
-                                comment.author === currentUserType
-                                    ? "bg-indigo-600 text-white shadow-xl shadow-indigo-600/20 rounded-tr-[4px]"
-                                    : "bg-white/5 border border-white/5 text-white/80 rounded-tl-[4px] backdrop-blur-md"
-                            )}>
-                                {comment.text}
-                            </div>
-                        </div>
-                    ))
+                        );
+                    })
                 )}
             </div>
 
-            <form onSubmit={handleSubmit} className="relative group">
-                <div className="absolute inset-0 bg-indigo-500/5 blur-2xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-700" />
+            <form onSubmit={(e) => void handleSubmit(e)} className="relative">
                 <textarea
-                    placeholder="Provide your feedback..."
+                    placeholder="Write a message… (Enter to send)"
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
-                    className="w-full min-h-[120px] bg-white/5 border border-white/5 rounded-[2rem] p-6 text-white text-sm placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all font-medium leading-relaxed relative z-10"
+                    rows={3}
+                    className="w-full rounded-xl p-3 pr-14 text-sm resize-none outline-none transition-all"
+                    style={{
+                        background: 'var(--input)',
+                        border: '1.5px solid var(--border-medium)',
+                        color: 'var(--text-primary)',
+                    }}
                     onKeyDown={(e) => {
                         if (e.key === 'Enter' && !e.shiftKey) {
                             e.preventDefault();
-                            handleSubmit(e);
+                            void handleSubmit(e);
                         }
                     }}
                 />
-                <div className="absolute bottom-4 right-4 z-20 flex items-center gap-2">
-                    <GlassButton
-                        type="submit"
-                        disabled={isSubmitting || !newComment.trim()}
-                        className="h-12 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-500 shadow-xl shadow-indigo-600/20 border-none transition-all group-active:scale-95"
-                    >
-                        {isSubmitting ? (
-                            <Loader2 size={18} className="animate-spin" />
-                        ) : (
-                            <><Send size={18} className="mr-2" /> Send Message</>
-                        )}
-                    </GlassButton>
-                </div>
+                <button
+                    type="submit"
+                    disabled={isSubmitting || !newComment.trim()}
+                    className="absolute bottom-3 right-3 h-8 w-8 flex items-center justify-center rounded-lg transition-all disabled:opacity-40"
+                    style={{ background: 'var(--accent)', color: 'var(--primary-foreground)' }}
+                >
+                    {isSubmitting ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+                </button>
             </form>
         </div>
     );

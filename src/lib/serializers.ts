@@ -246,6 +246,7 @@ export function serializeNotificationRecord(value: unknown): NotificationRecord 
 export function serializePortalPayload(input: {
   theme?: string;
   freelancerName?: string;
+  freelancerLogo?: string;
   project: unknown;
   approvals: unknown[];
   invoices: unknown[];
@@ -255,6 +256,7 @@ export function serializePortalPayload(input: {
   return {
     theme: (input.theme as PortalPayload['theme']) ?? DEFAULT_THEME,
     freelancerName: input.freelancerName ?? 'Your Freelancer',
+    freelancerLogo: input.freelancerLogo,
     project: serializeProjectDetail(input.project, {
       approvals: input.counts?.approvals,
       files: input.counts?.files,
