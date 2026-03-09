@@ -12,9 +12,9 @@ import { useUIStore } from '@/lib/store';
 import { ThemeSwitcher } from '@/components/themes/ThemeSwitcher';
 
 const navItems = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, exact: true },
-  { name: 'Projects',  href: '/dashboard/projects', icon: FolderKanban, exact: false },
-  { name: 'Settings',  href: '/dashboard/settings', icon: Settings, exact: false },
+  { name: 'Dashboard', href: '/dashboard',          icon: LayoutDashboard, exact: true },
+  { name: 'Projects',  href: '/dashboard/projects', icon: FolderKanban,    exact: false },
+  { name: 'Settings',  href: '/dashboard/settings', icon: Settings,        exact: false },
 ];
 
 export function GlassNav() {
@@ -26,7 +26,7 @@ export function GlassNav() {
       {/* ── Desktop sidebar ── */}
       <motion.aside
         initial={false}
-        animate={{ width: sidebarOpen ? 248 : 68 }}
+        animate={{ width: sidebarOpen ? 240 : 64 }}
         transition={{ duration: 0.26, ease: [0.4, 0, 0.2, 1] }}
         className="fixed left-0 top-0 z-50 hidden h-screen flex-col md:flex overflow-hidden"
         style={{
@@ -37,7 +37,7 @@ export function GlassNav() {
         }}
       >
         {/* Logo */}
-        <div className="flex h-16 items-center gap-3 px-4 shrink-0">
+        <div className="flex h-[60px] items-center gap-3 px-4 shrink-0">
           <Link href="/dashboard" className="flex items-center gap-3 min-w-0 flex-1">
             <div
               className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-white"
@@ -78,17 +78,15 @@ export function GlassNav() {
         <div className="mx-3 h-px shrink-0" style={{ background: 'var(--border-subtle)' }} />
 
         {/* Nav items */}
-        <nav className="flex-1 p-3 space-y-0.5 overflow-hidden">
+        <nav className="flex-1 p-2.5 space-y-0.5 overflow-hidden">
           {navItems.map((item) => {
-            const isActive = item.exact
-              ? pathname === item.href
-              : pathname.startsWith(item.href);
+            const isActive = item.exact ? pathname === item.href : pathname.startsWith(item.href);
             return (
               <Link key={item.name} href={item.href} title={!sidebarOpen ? item.name : undefined}>
                 <div
                   className={cn(
                     'relative flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all duration-150 overflow-hidden',
-                    isActive ? 'nav-item-active' : 'hover:bg-[var(--nav-item-hover)]'
+                    isActive ? 'nav-item-active' : 'hover:bg-[var(--nav-item-hover)]',
                   )}
                   style={{ color: isActive ? 'var(--nav-item-active-color)' : 'var(--text-secondary)' }}
                 >
@@ -113,7 +111,7 @@ export function GlassNav() {
         </nav>
 
         {/* Theme at bottom */}
-        <div className="p-3 shrink-0" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+        <div className="p-2.5 shrink-0" style={{ borderTop: '1px solid var(--border-subtle)' }}>
           {sidebarOpen && (
             <p className="mb-2 px-1 text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
               Theme
@@ -135,9 +133,7 @@ export function GlassNav() {
         }}
       >
         {navItems.map((item) => {
-          const isActive = item.exact
-            ? pathname === item.href
-            : pathname.startsWith(item.href);
+          const isActive = item.exact ? pathname === item.href : pathname.startsWith(item.href);
           return (
             <Link key={item.name} href={item.href} className="flex flex-col items-center gap-1">
               <div

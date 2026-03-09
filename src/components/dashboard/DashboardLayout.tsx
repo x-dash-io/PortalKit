@@ -11,12 +11,8 @@ import { StorageQuota } from '@/components/dashboard/StorageQuota';
 import { useUIStore } from '@/lib/store';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useState, useRef, useCallback } from 'react';
 
@@ -26,9 +22,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const searchDefault = pathname.startsWith('/dashboard/projects')
-    ? searchParams.get('q') ?? ''
-    : '';
+  const searchDefault = pathname.startsWith('/dashboard/projects') ? searchParams.get('q') ?? '' : '';
   const [searchValue, setSearchValue] = useState(searchDefault);
   const [searchFocused, setSearchFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -37,11 +31,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       const value = searchValue.trim();
-      router.push(
-        value ? `/dashboard/projects?q=${encodeURIComponent(value)}` : '/dashboard/projects'
-      );
+      router.push(value ? `/dashboard/projects?q=${encodeURIComponent(value)}` : '/dashboard/projects');
     },
-    [searchValue, router]
+    [searchValue, router],
   );
 
   const clearSearch = useCallback(() => {
@@ -51,11 +43,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   }, [pathname, router]);
 
   const initials = session?.user?.name
-    ?.split(' ')
-    .map((n: string) => n[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase() ?? 'U';
+    ?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() ?? 'U';
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--canvas)' }}>
@@ -63,13 +51,13 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
       <motion.div
         initial={false}
-        animate={{ paddingLeft: sidebarOpen ? 248 : 68 }}
+        animate={{ paddingLeft: sidebarOpen ? 240 : 64 }}
         transition={{ duration: 0.26, ease: [0.4, 0, 0.2, 1] }}
         className="min-h-screen pb-24 md:pb-0"
       >
         {/* ── Top header ── */}
         <header
-          className="sticky top-0 z-40"
+          className="sticky top-0 z-40 h-[60px] flex items-center"
           style={{
             background: 'var(--nav-bg)',
             borderBottom: '1px solid var(--nav-border)',
@@ -77,11 +65,11 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             WebkitBackdropFilter: 'blur(24px)',
           }}
         >
-          <div className="flex h-14 items-center gap-3 px-5">
+          <div className="flex w-full items-center gap-3 px-5">
             {/* Search */}
             <form
               onSubmit={handleSearch}
-              className="flex flex-1 max-w-md items-center gap-2.5 rounded-xl px-3 py-2 transition-all duration-150"
+              className="flex flex-1 max-w-sm items-center gap-2.5 rounded-xl px-3 py-2 transition-all duration-150"
               style={{
                 background: 'var(--surface-muted)',
                 border: `1px solid ${searchFocused ? 'var(--accent)' : 'var(--border-subtle)'}`,
@@ -90,11 +78,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             >
               <Search
                 size={13}
-                style={{
-                  color: searchFocused ? 'var(--accent)' : 'var(--text-muted)',
-                  flexShrink: 0,
-                  transition: 'color 0.15s',
-                }}
+                style={{ color: searchFocused ? 'var(--accent)' : 'var(--text-muted)', flexShrink: 0, transition: 'color 0.15s' }}
               />
               <input
                 ref={inputRef}
@@ -105,7 +89,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 onFocus={() => setSearchFocused(true)}
                 onBlur={() => setSearchFocused(false)}
                 onKeyDown={(e) => e.key === 'Escape' && clearSearch()}
-                placeholder="Search projects, clients…"
+                placeholder="Search projects…"
                 className="flex-1 bg-transparent text-sm outline-none min-w-0"
                 style={{ color: 'var(--text-primary)' }}
               />
@@ -155,6 +139,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
                 <DropdownMenuContent
                   align="end"
+                  sideOffset={8}
                   className="w-64 rounded-2xl p-1.5"
                   style={{
                     background: 'var(--popover)',
@@ -172,19 +157,13 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                     <StorageQuota />
                   </div>
                   <DropdownMenuSeparator style={{ background: 'var(--border-subtle)' }} />
-                  <DropdownMenuItem
-                    asChild
-                    className="rounded-xl px-3 py-2.5 cursor-pointer focus:bg-[var(--accent-light)] focus:text-[var(--accent)]"
-                  >
+                  <DropdownMenuItem asChild className="rounded-xl px-3 py-2.5 cursor-pointer focus:bg-[var(--accent-light)] focus:text-[var(--accent)]">
                     <Link href="/dashboard/settings/profile" className="flex items-center gap-2.5">
                       <User size={14} />
                       <span className="text-sm font-medium">Profile</span>
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem
-                    asChild
-                    className="rounded-xl px-3 py-2.5 cursor-pointer focus:bg-[var(--accent-light)] focus:text-[var(--accent)]"
-                  >
+                  <DropdownMenuItem asChild className="rounded-xl px-3 py-2.5 cursor-pointer focus:bg-[var(--accent-light)] focus:text-[var(--accent)]">
                     <Link href="/dashboard/settings/billing" className="flex items-center gap-2.5">
                       <CreditCard size={14} />
                       <span className="text-sm font-medium">Billing & Plan</span>
@@ -207,7 +186,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
         {/* ── Main content ── */}
         <main className="relative p-5 lg:p-7">
-          {/* Ambient orbs */}
           <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden>
             <div
               className="ambient-blob"
@@ -215,7 +193,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             />
             <div
               className="ambient-blob"
-              style={{ background: 'var(--accent-2)', width: 240, height: 240, bottom: -80, left: -40, opacity: 0.10 }}
+              style={{ background: 'var(--accent-2)', width: 240, height: 240, bottom: -80, left: -40, opacity: 0.09 }}
             />
           </div>
           <div className="relative max-w-7xl mx-auto">{children}</div>

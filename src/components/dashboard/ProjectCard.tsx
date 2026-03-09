@@ -17,37 +17,43 @@ interface ProjectCardProps {
 }
 
 const statusConfig: Record<string, { label: string; color: string; bg: string }> = {
-  active:    { label: 'Active',    color: 'var(--status-active)',    bg: 'var(--status-active-bg)' },
+  active:    { label: 'Active',    color: 'var(--status-active)',    bg: 'var(--status-active-bg)'    },
   completed: { label: 'Completed', color: 'var(--status-completed)', bg: 'var(--status-completed-bg)' },
-  archived:  { label: 'Archived',  color: 'var(--status-archived)',  bg: 'var(--status-archived-bg)' },
+  archived:  { label: 'Archived',  color: 'var(--status-archived)',  bg: 'var(--status-archived-bg)'  },
 };
 
+/* Deterministic colour per project based on title chars */
+const accentPalette = [
+  'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)',
+  'linear-gradient(135deg, #059669 0%, #10b981 100%)',
+  'linear-gradient(135deg, #d97706 0%, #f59e0b 100%)',
+  'linear-gradient(135deg, #dc2626 0%, #f87171 100%)',
+  'linear-gradient(135deg, #0284c7 0%, #38bdf8 100%)',
+];
+function projectGradient(title: string) {
+  let h = 0;
+  for (let i = 0; i < title.length; i++) h += title.charCodeAt(i);
+  return accentPalette[h % accentPalette.length];
+}
+
 export function ProjectCard({ project }: ProjectCardProps) {
-  const lastUpdated = new Date(project.updatedAt).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-  });
+  const lastUpdated = new Date(project.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   const status = statusConfig[project.status] ?? statusConfig.active;
-  const initials = project.title
-    .split(' ')
-    .map((w) => w[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
+  const initials = project.title.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase();
+  const gradient = projectGradient(project.title);
 
   return (
     <Link href={`/dashboard/projects/${project._id}`} className="block h-full group">
       <div
         className="glass-card card-interactive h-full rounded-2xl p-5 flex flex-col"
-        style={{ minHeight: 180 }}
+        style={{ minHeight: 190 }}
       >
         {/* Top row */}
         <div className="flex items-start justify-between gap-3 mb-4">
-          {/* Avatar + title */}
           <div className="flex items-start gap-3 flex-1 min-w-0">
             <div
               className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white text-sm font-black"
-              style={{ background: 'var(--accent-gradient)', boxShadow: 'var(--glow-sm)' }}
+              style={{ background: gradient, boxShadow: 'var(--glow-sm)' }}
             >
               {initials}
             </div>
@@ -58,10 +64,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
               >
                 {project.title}
               </h3>
-              <div
-                className="mt-1 flex items-center gap-1.5 text-xs"
-                style={{ color: 'var(--text-muted)' }}
-              >
+              <div className="mt-1 flex items-center gap-1.5 text-xs" style={{ color: 'var(--text-muted)' }}>
                 <UserRound size={10} />
                 <span className="truncate">{project.clientName}</span>
               </div>
@@ -70,23 +73,21 @@ export function ProjectCard({ project }: ProjectCardProps) {
 
           {/* Arrow */}
           <div
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border transition-all duration-150 group-hover:bg-[var(--accent)] group-hover:border-[var(--accent)] group-hover:text-white group-hover:shadow-[var(--glow-sm)]"
-            style={{ borderColor: 'var(--border-medium)', color: 'var(--text-muted)' }}
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border transition-all duration-150 group-hover:border-[var(--accent)] group-hover:text-white group-hover:shadow-[var(--glow-sm)]"
+            style={{
+              borderColor: 'var(--border-medium)',
+              color: 'var(--text-muted)',
+              background: 'transparent',
+            }}
           >
-            <ArrowUpRight size={14} />
+            <ArrowUpRight size={13} />
           </div>
         </div>
 
-        {/* Status badge */}
+        {/* Status */}
         <div className="mb-4">
-          <span
-            className="status-badge"
-            style={{ background: status.bg, color: status.color }}
-          >
-            <span
-              className="h-1.5 w-1.5 rounded-full pulse-dot shrink-0"
-              style={{ background: status.color }}
-            />
+          <span className="status-badge" style={{ background: status.bg, color: status.color }}>
+            <span className="h-1.5 w-1.5 rounded-full pulse-dot shrink-0" style={{ background: status.color }} />
             {status.label}
           </span>
         </div>
@@ -105,8 +106,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
         >
           <span className="font-mono opacity-60">{project._id.slice(-8)}</span>
           <div className="flex items-center gap-1">
-            <Clock size={9} />
-            <span>{lastUpdated}</span>
+            <Clock size={9} /><span>{lastUpdated}</span>
           </div>
         </div>
       </div>
@@ -114,15 +114,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
   );
 }
 
-function MetricChip({
-  icon: Icon,
-  value,
-  label,
-}: {
-  icon: typeof Folder;
-  value: number;
-  label: string;
-}) {
+function MetricChip({ icon: Icon, value, label }: { icon: typeof Folder; value: number; label: string }) {
   return (
     <div
       className="rounded-xl p-2.5 flex flex-col gap-1.5"

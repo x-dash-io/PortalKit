@@ -1,7 +1,7 @@
 'use client';
 
 import { useDeferredValue, useState, useRef, useCallback } from 'react';
-import { FolderKanban, Search, X, SlidersHorizontal, Plus } from 'lucide-react';
+import { FolderKanban, Search, X, Filter, Plus } from 'lucide-react';
 import type { ProjectSummary } from '@/lib/contracts';
 import { ProjectCard } from '@/components/dashboard/ProjectCard';
 import { NewProjectModal } from '@/components/dashboard/NewProjectModal';
@@ -23,8 +23,8 @@ export function ProjectsIndexClient({
   initialQuery?: string;
   initialStatus?: 'all' | ProjectSummary['status'];
 }) {
-  const [query,  setQuery]  = useState(initialQuery);
-  const [status, setStatus] = useState<'all' | ProjectSummary['status']>(initialStatus);
+  const [query,         setQuery]         = useState(initialQuery);
+  const [status,        setStatus]        = useState<'all' | ProjectSummary['status']>(initialStatus);
   const [searchFocused, setSearchFocused] = useState(false);
   const deferredQuery = useDeferredValue(query);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -58,10 +58,10 @@ export function ProjectsIndexClient({
             Projects
           </h1>
           <p
-            className="text-sm mt-0.5 transition-opacity duration-150"
+            className="text-sm mt-0.5 transition-opacity duration-200"
             style={{ color: 'var(--text-secondary)', opacity: isStale ? 0.4 : 1 }}
           >
-            {filteredProjects.length} of {projects.length} workspace{projects.length !== 1 ? 's' : ''}
+            {isStale ? 'Filtering…' : `${filteredProjects.length} of ${projects.length} workspace${projects.length !== 1 ? 's' : ''}`}
           </p>
         </div>
         <NewProjectModal />
@@ -69,12 +69,12 @@ export function ProjectsIndexClient({
 
       {/* ── Search + Filter bar ── */}
       <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
-        {/* Search */}
+        {/* Search input */}
         <div
           className="flex flex-1 items-center gap-2.5 rounded-xl px-3.5 py-2.5 transition-all duration-150"
           style={{
             background: 'var(--surface)',
-            border: `1px solid ${searchFocused ? 'var(--accent)' : 'var(--border-medium)'}`,
+            border: `1.5px solid ${searchFocused ? 'var(--accent)' : 'var(--border-medium)'}`,
             boxShadow: searchFocused ? 'var(--glow-accent)' : 'var(--shadow-xs)',
           }}
         >
@@ -99,19 +99,15 @@ export function ProjectsIndexClient({
             style={{ color: 'var(--text-primary)' }}
           />
 
-          {/* Spinner while deferred */}
+          {/* Deferred spinner */}
           {isStale && (
             <div
-              className="h-3.5 w-3.5 rounded-full border-2 shrink-0"
-              style={{
-                borderColor: 'var(--accent)',
-                borderTopColor: 'transparent',
-                animation: 'spin 0.6s linear infinite',
-              }}
+              className="h-3.5 w-3.5 rounded-full border-2 shrink-0 spin-slow"
+              style={{ borderColor: 'var(--accent)', borderTopColor: 'transparent' }}
             />
           )}
 
-          {/* Clear query button */}
+          {/* Clear query */}
           {query && !isStale && (
             <button
               onClick={clearQuery}
@@ -127,9 +123,9 @@ export function ProjectsIndexClient({
         {/* Status filter pills */}
         <div
           className="flex items-center gap-1 rounded-xl p-1 shrink-0"
-          style={{ background: 'var(--surface-muted)', border: '1px solid var(--border-subtle)' }}
+          style={{ background: 'var(--surface-muted)', border: '1.5px solid var(--border-subtle)' }}
         >
-          <SlidersHorizontal size={11} className="ml-1.5 shrink-0" style={{ color: 'var(--text-muted)' }} />
+          <Filter size={11} className="ml-1.5 shrink-0" style={{ color: 'var(--text-muted)' }} />
           {STATUS_OPTIONS.map((option) => {
             const active = status === option.value;
             return (
@@ -138,12 +134,12 @@ export function ProjectsIndexClient({
                 onClick={() => setStatus(option.value as typeof status)}
                 className={cn(
                   'rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-150',
-                  !active && 'hover:bg-[var(--accent-light)]'
+                  !active && 'hover:bg-[var(--accent-light)] hover:text-[var(--accent)]'
                 )}
                 style={{
-                  background:  active ? 'var(--accent)' : undefined,
-                  color:       active ? 'var(--primary-foreground)' : 'var(--text-secondary)',
-                  boxShadow:   active ? 'var(--glow-sm)' : undefined,
+                  background: active ? 'var(--accent)' : undefined,
+                  color:      active ? 'var(--primary-foreground)' : 'var(--text-secondary)',
+                  boxShadow:  active ? 'var(--glow-sm)' : undefined,
                 }}
               >
                 {option.label}
@@ -152,14 +148,14 @@ export function ProjectsIndexClient({
           })}
         </div>
 
-        {/* Clear all */}
+        {/* Clear all filters */}
         {isFiltered && !isStale && (
           <button
             onClick={clearAll}
-            className="flex items-center gap-1.5 rounded-xl px-3 py-2.5 text-xs font-semibold transition-all duration-150 hover:bg-[var(--destructive-bg)] shrink-0"
+            className="flex items-center gap-1.5 rounded-xl px-3 py-2.5 text-xs font-semibold transition-all duration-150 hover:bg-[var(--destructive-bg)] hover:text-[var(--destructive)] shrink-0"
             style={{
               color: 'var(--text-secondary)',
-              border: '1px solid var(--border-medium)',
+              border: '1.5px solid var(--border-medium)',
               background: 'var(--surface)',
             }}
           >
@@ -168,6 +164,28 @@ export function ProjectsIndexClient({
           </button>
         )}
       </div>
+
+      {/* ── Active filter indicator ── */}
+      {isFiltered && !isStale && filteredProjects.length > 0 && (
+        <div
+          className="flex items-center gap-2 rounded-xl px-3.5 py-2.5 animate-slide-up"
+          style={{ background: 'var(--accent-light)', border: '1px solid var(--border-accent)' }}
+        >
+          <Filter size={12} style={{ color: 'var(--accent)' }} />
+          <p className="text-xs font-semibold" style={{ color: 'var(--accent)' }}>
+            Showing {filteredProjects.length} filtered result{filteredProjects.length !== 1 ? 's' : ''}
+            {query && ` for "${query}"`}
+            {status !== 'all' && ` · ${status}`}
+          </p>
+          <button
+            onClick={clearAll}
+            className="ml-auto text-xs font-bold underline"
+            style={{ color: 'var(--accent)' }}
+          >
+            Clear
+          </button>
+        </div>
+      )}
 
       {/* ── Results ── */}
       {filteredProjects.length === 0 ? (
@@ -195,8 +213,7 @@ export function ProjectsIndexClient({
               className="inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold transition-colors"
               style={{ background: 'var(--accent-light)', color: 'var(--accent)' }}
             >
-              <X size={13} />
-              Clear filters
+              <X size={13} /> Clear filters
             </button>
           ) : (
             <NewProjectModal />
@@ -205,13 +222,13 @@ export function ProjectsIndexClient({
       ) : (
         <div
           className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3"
-          style={{ opacity: isStale ? 0.55 : 1, transition: 'opacity 0.15s ease' }}
+          style={{ opacity: isStale ? 0.5 : 1, transition: 'opacity 0.15s ease' }}
         >
           {filteredProjects.map((project, i) => (
             <div
               key={project._id}
               className="animate-fade-up"
-              style={{ animationDelay: `${i * 35}ms` }}
+              style={{ animationDelay: `${i * 30}ms` }}
             >
               <ProjectCard project={project} />
             </div>
