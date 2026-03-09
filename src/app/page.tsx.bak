@@ -1,0 +1,143 @@
+import Link from 'next/link';
+import {
+  ArrowRight, Bell, CheckCircle2, CreditCard,
+  Files, FolderKanban, Zap, ShieldCheck, Sparkles,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+
+const pillars = [
+  { icon: FolderKanban, title: 'Project control', description: 'Track milestones and context in one place. Stop losing work inside message threads.' },
+  { icon: Files, title: 'Asset delivery', description: 'Share files, manage versions, and expose only the client-safe surfaces you actually want visible.' },
+  { icon: CheckCircle2, title: 'Approvals', description: 'Capture approvals and revision requests against specific deliverables with a clear audit trail.' },
+  { icon: CreditCard, title: 'Invoices', description: 'Create invoices, monitor views, follow overdue balances, and keep billing tied to the project.' },
+  { icon: Bell, title: 'Notifications', description: 'Get signal when clients act instead of polling inboxes, docs, and shared drives all day.' },
+  { icon: ShieldCheck, title: 'Client portal', description: 'Present a secure, branded project portal that feels more like product than a shared folder.' },
+];
+
+const steps = [
+  'Create a project and invite the client to a dedicated portal',
+  'Upload files, request approvals, and keep revision threads attached to deliverables',
+  'Issue invoices, track views, and follow up on overdue balances',
+  'Use notifications and settings to keep the workspace high-signal',
+];
+
+export default function Home() {
+  return (
+    <main style={{ minHeight: '100vh', background: 'var(--canvas)' }}>
+      {/* Ambient orbs */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="absolute -top-60 left-1/4 h-96 w-96 rounded-full opacity-20"
+          style={{ background: 'radial-gradient(circle, var(--accent) 0%, transparent 70%)', filter: 'blur(80px)' }} />
+        <div className="absolute top-1/2 -right-40 h-80 w-80 rounded-full opacity-10"
+          style={{ background: 'radial-gradient(circle, var(--accent-2) 0%, transparent 70%)', filter: 'blur(60px)' }} />
+      </div>
+
+      <div className="relative mx-auto max-w-7xl px-6 py-8">
+        {/* Nav */}
+        <header className="flex items-center justify-between rounded-2xl px-5 py-3.5"
+          style={{ background: 'var(--surface-elevated)', border: '1px solid var(--border-subtle)', backdropFilter: 'blur(20px)', boxShadow: 'var(--shadow-soft)' }}>
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl text-white"
+              style={{ background: 'var(--accent)', boxShadow: 'var(--glow-sm)' }}>
+              <Zap size={17} strokeWidth={2.5} />
+            </span>
+            <span className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>PortalKit</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button asChild variant="ghost" size="sm" className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+              <Link href="/auth/login">Sign in</Link>
+            </Button>
+            <Button asChild size="sm" className="rounded-xl text-sm font-semibold"
+              style={{ background: 'var(--accent)', color: 'white', boxShadow: 'var(--glow-sm)' }}>
+              <Link href="/auth/signup">Get started <ArrowRight size={14} /></Link>
+            </Button>
+          </div>
+        </header>
+
+        {/* Hero */}
+        <section className="mt-20 text-center">
+          <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-wider mb-6"
+            style={{ background: 'var(--accent-light)', color: 'var(--accent)', border: '1px solid var(--border-subtle)' }}>
+            <Sparkles size={12} />
+            Enterprise-grade client operations
+          </div>
+
+          <h1 className="mx-auto max-w-4xl text-5xl font-black leading-[1.04] tracking-tight md:text-6xl lg:text-7xl"
+            style={{ color: 'var(--text-primary)' }}>
+            Replace scattered client ops with one{' '}
+            <span className="gradient-text">serious system.</span>
+          </h1>
+          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+            PortalKit gives freelancers and studios one place to run projects, deliver files,
+            collect approvals, send invoices, and keep clients aligned.
+          </p>
+
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <Button asChild size="lg" className="rounded-xl px-6 font-semibold"
+              style={{ background: 'var(--accent)', color: 'white', boxShadow: 'var(--glow)' }}>
+              <Link href="/auth/signup">Create Workspace <ArrowRight size={16} /></Link>
+            </Button>
+            <Button asChild size="lg" variant="outline" className="rounded-xl px-6"
+              style={{ borderColor: 'var(--border-strong)', color: 'var(--text-secondary)' }}>
+              <Link href="/dashboard">Open Dashboard</Link>
+            </Button>
+          </div>
+
+          {/* Stats strip */}
+          <div className="mt-16 grid grid-cols-3 gap-4 max-w-lg mx-auto">
+            {[
+              { label: 'Client portal', value: 'Secure by default' },
+              { label: 'Workflow', value: 'Files → Invoices' },
+              { label: 'Designed for', value: 'Studios & freelancers' },
+            ].map((item) => (
+              <div key={item.label} className="glass-card rounded-2xl p-4">
+                <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--text-muted)' }}>{item.label}</p>
+                <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{item.value}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Workflow card */}
+        <section className="mt-20">
+          <div className="mx-auto max-w-2xl glass-card rounded-2xl p-6">
+            <h2 className="text-lg font-bold mb-4" style={{ color: 'var(--text-primary)' }}>How it works</h2>
+            <div className="space-y-3">
+              {steps.map((step, index) => (
+                <div key={step} className="flex gap-4 items-start rounded-xl p-3.5"
+                  style={{ background: 'var(--surface-muted)', border: '1px solid var(--border-subtle)' }}>
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg font-mono text-xs font-bold text-white"
+                    style={{ background: 'var(--accent)' }}>
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                  <p className="text-sm leading-relaxed pt-0.5" style={{ color: 'var(--text-secondary)' }}>{step}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Features grid */}
+        <section className="mt-16 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {pillars.map((pillar) => (
+            <div key={pillar.title} className="glass-card card-interactive rounded-2xl p-5">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl mb-4"
+                style={{ background: 'var(--accent-light)', color: 'var(--accent)' }}>
+                <pillar.icon size={20} />
+              </div>
+              <h3 className="text-base font-bold mb-2" style={{ color: 'var(--text-primary)' }}>{pillar.title}</h3>
+              <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{pillar.description}</p>
+            </div>
+          ))}
+        </section>
+
+        {/* Footer */}
+        <footer className="mt-20 pb-8 text-center">
+          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+            &copy; {new Date().getFullYear()} PortalKit. Built for serious client operations.
+          </p>
+        </footer>
+      </div>
+    </main>
+  );
+}

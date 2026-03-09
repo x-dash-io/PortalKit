@@ -7,10 +7,8 @@ import { signIn } from 'next-auth/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { ArrowRight, Lock, Mail } from 'lucide-react';
+import { ArrowRight, Loader2, Lock, Mail, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
@@ -18,35 +16,23 @@ const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
 });
-
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const form = useForm<LoginFormValues>({
+  const [showPassword, setShowPassword] = useState(false);
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-    },
+    defaultValues: { email: '', password: '' },
   });
 
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
     try {
-      const result = await signIn('credentials', {
-        email: data.email,
-        password: data.password,
-        redirect: false,
-      });
-
-      if (result?.error) {
-        toast.error(result.error);
-        return;
-      }
-
-      toast.success('Signed in');
+      const result = await signIn('credentials', { email: data.email, password: data.password, redirect: false });
+      if (result?.error) { toast.error(result.error); return; }
+      toast.success('Welcome back!');
       router.push('/dashboard');
       router.refresh();
     } catch {
@@ -57,56 +43,84 @@ export default function LoginPage() {
   };
 
   return (
-    <Card className="overflow-hidden rounded-[2.25rem] border border-slate-200/80 bg-[color-mix(in_srgb,var(--surface)_94%,white)] p-0 shadow-[0_30px_80px_rgba(15,23,42,0.12)]">
-      <CardHeader className="space-y-3 border-b border-slate-200/70 px-8 py-8">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[var(--text-muted)]">Access workspace</p>
-        <CardTitle className="text-4xl font-semibold tracking-tight text-[var(--text-primary)]">Sign in</CardTitle>
-        <CardDescription className="max-w-md text-base leading-relaxed text-[var(--text-secondary)]">
-          Open your delivery workspace, review project activity, and manage client-facing operations.
-        </CardDescription>
-      </CardHeader>
+    <div
+      className="rounded-2xl p-7"
+      style={{
+        background: 'var(--surface)',
+        border: '1px solid var(--border-medium)',
+        boxShadow: 'var(--shadow-modal)',
+      }}
+    >
+      <div className="mb-7">
+        <h2 className="text-xl font-black tracking-tight" style={{ color: 'var(--text-primary)' }}>Sign in</h2>
+        <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>Welcome back to your workspace</p>
+      </div>
 
-      <form onSubmit={form.handleSubmit(onSubmit)}>
-        <CardContent className="space-y-5 px-8 py-8">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={16} />
-              <Input id="email" type="email" className="h-[52px] rounded-2xl border-slate-200 pl-11" {...form.register('email')} />
-            </div>
-            {form.formState.errors.email && <p className="text-sm text-red-600">{form.formState.errors.email.message}</p>}
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <div className="space-y-1.5">
+          <Label className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-secondary)' }}>
+            Email
+          </Label>
+          <div className="relative">
+            <Mail size={13} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
+            <Input
+              {...register('email')}
+              type="email"
+              placeholder="you@studio.com"
+              className="input-base pl-9 h-10 text-sm"
+            />
           </div>
+          {errors.email && <p className="text-xs font-medium" style={{ color: 'var(--destructive)' }}>{errors.email.message}</p>}
+        </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={16} />
-              <Input id="password" type="password" className="h-[52px] rounded-2xl border-slate-200 pl-11" {...form.register('password')} />
-            </div>
-            {form.formState.errors.password && (
-              <p className="text-sm text-red-600">{form.formState.errors.password.message}</p>
-            )}
+        <div className="space-y-1.5">
+          <Label className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-secondary)' }}>
+            Password
+          </Label>
+          <div className="relative">
+            <Lock size={13} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
+            <Input
+              {...register('password')}
+              type={showPassword ? 'text' : 'password'}
+              placeholder="••••••••"
+              className="input-base pl-9 pr-9 h-10 text-sm"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors hover:text-[var(--text-primary)]"
+              style={{ color: 'var(--text-muted)' }}
+            >
+              {showPassword ? <EyeOff size={13} /> : <Eye size={13} />}
+            </button>
           </div>
-        </CardContent>
+          {errors.password && <p className="text-xs font-medium" style={{ color: 'var(--destructive)' }}>{errors.password.message}</p>}
+        </div>
 
-        <CardFooter className="flex flex-col gap-4 border-t border-slate-200/70 px-8 py-8">
-          <Button
-            type="submit"
-            size="lg"
-            className="h-[52px] w-full rounded-2xl bg-[var(--accent)] text-white shadow-[0_24px_50px_rgba(15,118,110,0.22)] hover:bg-[var(--accent-hover)]"
-            disabled={isLoading}
-          >
-            {isLoading ? 'Signing in...' : 'Sign In'}
-            {!isLoading && <ArrowRight size={16} />}
-          </Button>
-          <p className="text-center text-sm text-[var(--text-secondary)]">
-            Don&apos;t have an account?{' '}
-            <Link href="/auth/signup" className="font-semibold text-[var(--accent)] hover:underline">
-              Create one
-            </Link>
-          </p>
-        </CardFooter>
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="w-full h-10 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-150 mt-2 disabled:opacity-60 disabled:cursor-not-allowed"
+          style={{
+            background: 'var(--accent)',
+            color: 'var(--primary-foreground)',
+            boxShadow: isLoading ? 'none' : 'var(--glow-sm)',
+          }}
+        >
+          {isLoading ? (
+            <><Loader2 size={14} className="animate-spin" />Signing in…</>
+          ) : (
+            <>Sign in <ArrowRight size={14} /></>
+          )}
+        </button>
       </form>
-    </Card>
+
+      <p className="mt-5 text-center text-xs" style={{ color: 'var(--text-muted)' }}>
+        Don&apos;t have an account?{' '}
+        <Link href="/auth/signup" className="font-semibold hover:underline" style={{ color: 'var(--accent)' }}>
+          Create one
+        </Link>
+      </p>
+    </div>
   );
 }

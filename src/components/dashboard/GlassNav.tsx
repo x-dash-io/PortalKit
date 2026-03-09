@@ -2,17 +2,19 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { motion } from 'framer-motion';
-import { FolderKanban, LayoutDashboard, PanelLeftClose, PanelLeftOpen, Settings, ShieldCheck } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  FolderKanban, LayoutDashboard, PanelLeftClose,
+  PanelLeftOpen, Settings, Zap,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUIStore } from '@/lib/store';
-import { Button } from '@/components/ui/button';
 import { ThemeSwitcher } from '@/components/themes/ThemeSwitcher';
 
 const navItems = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Projects', href: '/dashboard/projects', icon: FolderKanban },
-  { name: 'Settings', href: '/dashboard/settings', icon: Settings },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, exact: true },
+  { name: 'Projects',  href: '/dashboard/projects', icon: FolderKanban, exact: false },
+  { name: 'Settings',  href: '/dashboard/settings', icon: Settings, exact: false },
 ];
 
 export function GlassNav() {
@@ -21,86 +23,138 @@ export function GlassNav() {
 
   return (
     <>
+      {/* ── Desktop sidebar ── */}
       <motion.aside
         initial={false}
-        animate={{ width: sidebarOpen ? 272 : 96 }}
-        transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
-        className={cn(
-          'fixed left-0 top-0 z-50 hidden h-screen flex-col border-r border-[var(--border-subtle)] bg-[color-mix(in_srgb,var(--surface-elevated)_92%,transparent)] px-4 py-5 backdrop-blur-xl md:flex',
-          !sidebarOpen && 'items-center'
-        )}
+        animate={{ width: sidebarOpen ? 248 : 68 }}
+        transition={{ duration: 0.26, ease: [0.4, 0, 0.2, 1] }}
+        className="fixed left-0 top-0 z-50 hidden h-screen flex-col md:flex overflow-hidden"
+        style={{
+          background: 'var(--nav-bg)',
+          borderRight: '1px solid var(--nav-border)',
+          backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
+        }}
       >
-        <div className="flex w-full items-center justify-between gap-3 px-2">
-          <div className="flex items-center gap-3 overflow-hidden">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--accent)] text-white shadow-[var(--glow)]">
-              <ShieldCheck size={20} />
+        {/* Logo */}
+        <div className="flex h-16 items-center gap-3 px-4 shrink-0">
+          <Link href="/dashboard" className="flex items-center gap-3 min-w-0 flex-1">
+            <div
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-white"
+              style={{ background: 'var(--accent-gradient)', boxShadow: 'var(--glow-sm)', flexShrink: 0 }}
+            >
+              <Zap size={15} strokeWidth={2.5} />
             </div>
-            {sidebarOpen && (
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[var(--text-muted)]">PortalKit</p>
-                <p className="text-xs text-[var(--text-secondary)]">Client operations</p>
-              </div>
-            )}
-          </div>
-          <Button
-            variant="ghost"
-            size="icon"
+            <AnimatePresence>
+              {sidebarOpen && (
+                <motion.div
+                  initial={{ opacity: 0, x: -6 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -6 }}
+                  transition={{ duration: 0.16 }}
+                  className="min-w-0 flex-1"
+                >
+                  <p className="text-sm font-black tracking-tight truncate" style={{ color: 'var(--text-primary)' }}>
+                    PortalKit
+                  </p>
+                  <p className="text-[10px] font-medium truncate" style={{ color: 'var(--text-muted)' }}>
+                    Client workspace
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </Link>
+
+          <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="rounded-2xl text-[var(--text-secondary)] hover:bg-[var(--accent-light)] hover:text-[var(--accent)]"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors hover:bg-[var(--nav-item-hover)]"
+            style={{ color: 'var(--text-muted)' }}
+            title={sidebarOpen ? 'Collapse' : 'Expand'}
           >
-            {sidebarOpen ? <PanelLeftClose size={20} /> : <PanelLeftOpen size={20} />}
-          </Button>
+            {sidebarOpen ? <PanelLeftClose size={14} /> : <PanelLeftOpen size={14} />}
+          </button>
         </div>
 
-        <nav className="mt-8 flex-1 space-y-2">
-          {navItems.map((item) => {
-            const isActive = item.href === '/dashboard' ? pathname === item.href : pathname.startsWith(item.href);
+        <div className="mx-3 h-px shrink-0" style={{ background: 'var(--border-subtle)' }} />
 
+        {/* Nav items */}
+        <nav className="flex-1 p-3 space-y-0.5 overflow-hidden">
+          {navItems.map((item) => {
+            const isActive = item.exact
+              ? pathname === item.href
+              : pathname.startsWith(item.href);
             return (
-              <Link key={item.name} href={item.href}>
+              <Link key={item.name} href={item.href} title={!sidebarOpen ? item.name : undefined}>
                 <div
                   className={cn(
-                    'group relative flex items-center gap-3 overflow-hidden rounded-3xl border px-4 py-3.5 transition-all',
-                    isActive
-                      ? 'border-[var(--accent)]/15 bg-[var(--accent-light)] text-[var(--accent)]'
-                      : 'border-transparent text-[var(--text-secondary)] hover:border-[var(--border-subtle)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)]'
+                    'relative flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all duration-150 overflow-hidden',
+                    isActive ? 'nav-item-active' : 'hover:bg-[var(--nav-item-hover)]'
                   )}
+                  style={{ color: isActive ? 'var(--nav-item-active-color)' : 'var(--text-secondary)' }}
                 >
-                  {isActive && (
-                    <motion.div layoutId="nav-highlight" className="absolute inset-y-2 left-2 w-1 rounded-full bg-[var(--accent)]" />
-                  )}
-                  <item.icon size={20} className="shrink-0" />
-                  {sidebarOpen && <span className="truncate text-sm font-semibold">{item.name}</span>}
+                  <item.icon size={16} className="shrink-0" />
+                  <AnimatePresence>
+                    {sidebarOpen && (
+                      <motion.span
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.12 }}
+                        className="truncate text-sm font-semibold"
+                      >
+                        {item.name}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
                 </div>
               </Link>
             );
           })}
         </nav>
 
-        <div className={cn('space-y-4 border-t border-[var(--border-subtle)] px-2 pt-5', !sidebarOpen && 'flex flex-col items-center')}>
+        {/* Theme at bottom */}
+        <div className="p-3 shrink-0" style={{ borderTop: '1px solid var(--border-subtle)' }}>
           {sidebarOpen && (
-            <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--text-muted)]">Workspace theme</p>
+            <p className="mb-2 px-1 text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
+              Theme
+            </p>
           )}
-          <ThemeSwitcher />
+          <ThemeSwitcher compact={!sidebarOpen} />
         </div>
       </motion.aside>
 
-      <nav className="fixed bottom-4 left-4 right-4 z-50 flex h-18 items-center justify-around rounded-[2rem] border border-[var(--border-subtle)] bg-[color-mix(in_srgb,var(--surface-elevated)_92%,transparent)] px-4 shadow-[var(--shadow-soft)] backdrop-blur-xl md:hidden">
+      {/* ── Mobile bottom nav ── */}
+      <nav
+        className="fixed bottom-4 left-4 right-4 z-50 flex h-16 items-center justify-around rounded-2xl px-2 md:hidden"
+        style={{
+          background: 'var(--nav-bg)',
+          border: '1px solid var(--nav-border)',
+          backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
+          boxShadow: 'var(--shadow-soft)',
+        }}
+      >
         {navItems.map((item) => {
-          const isActive = item.href === '/dashboard' ? pathname === item.href : pathname.startsWith(item.href);
-
+          const isActive = item.exact
+            ? pathname === item.href
+            : pathname.startsWith(item.href);
           return (
             <Link key={item.name} href={item.href} className="flex flex-col items-center gap-1">
               <div
-                className={cn(
-                  'rounded-2xl p-3 transition-all',
-                  isActive
-                    ? 'bg-[var(--accent-light)] text-[var(--accent)]'
-                    : 'text-[var(--text-secondary)]'
-                )}
+                className="rounded-xl p-2 transition-all duration-150"
+                style={{
+                  background: isActive ? 'var(--accent-light)' : undefined,
+                  color: isActive ? 'var(--accent)' : 'var(--text-secondary)',
+                }}
               >
-                <item.icon size={22} />
+                <item.icon size={18} />
               </div>
+              <span
+                className="text-[9px] font-semibold"
+                style={{ color: isActive ? 'var(--accent)' : 'var(--text-muted)' }}
+              >
+                {item.name}
+              </span>
             </Link>
           );
         })}

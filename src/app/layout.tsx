@@ -20,15 +20,19 @@ const ibmPlexMono = localFont({
 });
 
 export const metadata = {
-  title: 'PortalKit',
-  description: 'Client portal infrastructure for modern freelance and studio operations.',
+  title: 'PortalKit — Client operations for modern studios',
+  description: 'PortalKit gives freelancers and studios one place to run projects, deliver files, collect approvals, send invoices, and keep clients aligned.',
+  icons: {
+    icon: [
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon.ico' },
+    ],
+    apple: '/apple-touch-icon.png',
+  },
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${manrope.variable} ${ibmPlexMono.variable} font-sans antialiased`}>
